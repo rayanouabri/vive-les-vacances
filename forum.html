@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum Parents - Vive Les Vacances</title>
+    <meta name="description" content="Le forum des parents de l'association Vive Les Vacances. Échangez, posez vos questions et partagez vos expériences.">
+    <link rel="icon" href="images/favicon.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- TOAST -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- HEADER -->
+    <header class="header header-solid" id="header">
+        <div class="container header-inner">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="Logo Vive Les Vacances" width="60" height="59">
+            </a>
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="index.html#qui" class="nav-link">Qui Sommes-Nous ?</a>
+                <a href="index.html#nos" class="nav-link">Nos Actions</a>
+                <a href="index.html#nous" class="nav-link">Nous Contacter</a>
+                <a href="forum.html" class="nav-link active">Forum Parents</a>
+            </nav>
+            <a href="https://fr.ulule.com/vive-les-vacances-lille/" target="_blank" rel="noopener" class="btn btn-donate header-btn">
+                Faire un don
+            </a>
+            <button class="hamburger" id="hamburger" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- FORUM HERO -->
+    <section class="forum-hero">
+        <div class="container">
+            <h1>Forum des Parents</h1>
+            <p>Échangez avec d'autres parents, partagez vos expériences et posez vos questions</p>
+        </div>
+    </section>
+
+    <!-- FORUM CONTENT -->
+    <section class="section">
+        <div class="container">
+
+            <!-- Status -->
+            <div class="forum-status" id="forumStatus">
+                <div class="forum-status-dot"></div>
+                <span>Connexion au forum...</span>
+            </div>
+
+            <!-- Nouveau sujet -->
+            <div class="forum-new-topic">
+                <div class="forum-new-topic-header" onclick="toggleNewTopicForm()">
+                    <h3>&#9997; Créer un nouveau sujet</h3>
+                    <button class="forum-toggle-form" id="toggleFormBtn">
+                        <span class="toggle-icon">+</span>
+                    </button>
+                </div>
+                <form id="forumForm" class="forum-form-body">
+                    <div class="form-row">
+                        <input type="text" id="authorName" placeholder="Votre prénom" required maxlength="50">
+                        <select id="topicCategory">
+                            <option value="general">💬 Discussion générale</option>
+                            <option value="vacances">🏕️ Retours de vacances</option>
+                            <option value="conseils">💡 Conseils & Astuces</option>
+                            <option value="entraide">🤝 Entraide</option>
+                        </select>
+                    </div>
+                    <input type="text" id="topicTitle" placeholder="Titre du sujet" required maxlength="120">
+                    <textarea id="topicContent" placeholder="Votre message..." required maxlength="2000" rows="4"></textarea>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Publier le sujet</span>
+                        <span class="btn-loader" style="display:none;"></span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Filtres -->
+            <div class="forum-toolbar">
+                <div class="forum-filters">
+                    <button class="filter-btn active" data-filter="all">Tous</button>
+                    <button class="filter-btn" data-filter="general">💬 Discussion</button>
+                    <button class="filter-btn" data-filter="vacances">🏕️ Vacances</button>
+                    <button class="filter-btn" data-filter="conseils">💡 Conseils</button>
+                    <button class="filter-btn" data-filter="entraide">🤝 Entraide</button>
+                </div>
+                <div class="forum-count" id="forumCount">0 sujets</div>
+            </div>
+
+            <!-- Liste des sujets -->
+            <div class="forum-topics" id="forumTopics">
+                <div class="forum-loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des discussions...</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER SIMPLE -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <div class="footer-brand">
+                    <img src="images/logo.png" alt="Logo VLV" width="40" height="39">
+                    <span>Vive Les Vacances</span>
+                </div>
+                <div class="footer-links">
+                    <a href="index.html">Accueil</a>
+                    <a href="index.html#qui">Qui Sommes-Nous</a>
+                    <a href="index.html#nos">Nos Actions</a>
+                    <a href="index.html#nous">Contact</a>
+                </div>
+                <p class="footer-copy">&copy; 2025 Vive Les Vacances &mdash; Association lilloise depuis 1993</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="forum.js"></script>
+</body>
+</html>
