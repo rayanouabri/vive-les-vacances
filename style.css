@@ -609,6 +609,96 @@ img { max-width: 100%; height: auto; display: block; }
     .action-detail-text h2 { font-size: 1.4rem; }
     .actions-hero { padding: 110px 0 40px; }
     .actions-hero h1 { font-size: 2rem; }
+    .events-hero { padding: 110px 0 40px; }
+    .events-hero h1 { font-size: 2rem; }
+}
+
+/* ===== ÉVÉNEMENTS PAGE ===== */
+.events-hero {
+    background: linear-gradient(135deg, #0073aa, #1e62c9);
+    color: #fff;
+    padding: 130px 0 60px;
+    text-align: center;
+}
+.events-hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+}
+.events-hero p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.8;
+}
+
+.event-section { padding: 60px 0; }
+.event-bg-alt { background: #f8f9fa; }
+
+.event-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    padding-bottom: 16px;
+    border-bottom: 4px solid;
+}
+.event-blue { color: #0073aa; border-color: #0073aa; }
+.event-green { color: #2e7d32; border-color: #2e7d32; }
+.event-orange { color: #e65100; border-color: #ff9800; }
+.event-purple { color: #7b1fa2; border-color: #7b1fa2; }
+.event-darkblue { color: #1565c0; border-color: #1565c0; }
+.event-red { color: #d32f2f; border-color: #d32f2f; }
+.event-teal { color: #00838f; border-color: #0097a7; }
+
+.event-block {
+    margin-bottom: 30px;
+}
+.event-block h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: #333;
+}
+
+.event-info-box {
+    background: #f0f8ff;
+    border-left: 4px solid #0073aa;
+    border-radius: 8px;
+    padding: 24px 28px;
+    line-height: 1.9;
+}
+.event-info-box.event-info-alt {
+    background: #e6f4ff;
+    border-left-color: #4da6ff;
+}
+.event-info-box p {
+    margin-bottom: 12px;
+    color: #444;
+}
+.event-info-box p:last-child { margin-bottom: 0; }
+.event-info-box h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: #333;
+}
+.event-info-box h4:first-child { margin-top: 0; }
+.event-info-box ul {
+    padding-left: 24px;
+    margin-bottom: 12px;
+}
+.event-info-box ul:last-child { margin-bottom: 0; }
+.event-info-box li {
+    margin-bottom: 6px;
+    color: #444;
+}
+
+@media (max-width: 768px) {
+    .event-title { font-size: 1.5rem; }
+    .event-info-box { padding: 18px 20px; }
+    .event-block h3 { font-size: 1.15rem; }
 }
 
 /* ===== FORUM HERO ===== */
