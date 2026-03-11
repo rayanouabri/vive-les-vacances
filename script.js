@@ -75,14 +75,14 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, { threshold: 0.15 });
 
-document.querySelectorAll('.fade-in, .stat-card, .footer-col, .testimonial-inner, .contact-form').forEach(el => {
+document.querySelectorAll('.fade-in, .stat-card, .footer-col, .testimonial-inner, .contact-form, .value-card, .centre-card').forEach(el => {
     if (!el.classList.contains('fade-in')) el.classList.add('fade-in');
     observer.observe(el);
 });
 
 // Counter trigger
 let countersDone = false;
-const statsSection = document.getElementById('qui');
+const statsSection = document.querySelector('.section-stats');
 if (statsSection) {
     new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && !countersDone) {

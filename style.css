@@ -274,14 +274,60 @@ img { max-width: 100%; height: auto; display: block; }
 .section-blue .section-title { color: #fff; }
 .text-white { color: #fff !important; }
 
-/* ===== STATS ===== */
-.section-stats { padding: 100px 0; }
+/* ===== MISSION / QUI SOMMES-NOUS ===== */
+.section-mission { padding: 100px 0 60px; background: #fff; }
 
-.stats-grid {
+.mission-text {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 50px;
+    font-size: 1.1rem;
+    line-height: 1.9;
+    color: #555;
+}
+
+.mission-values {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 30px;
     max-width: 900px;
+    margin: 0 auto;
+}
+
+.value-card {
+    text-align: center;
+    padding: 36px 28px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    border: 1px solid #eef2f7;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.value-card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+
+.value-icon { font-size: 2.5rem; margin-bottom: 16px; }
+
+.value-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e62c9;
+    margin-bottom: 10px;
+}
+
+.value-card p {
+    font-size: 0.92rem;
+    color: #666;
+    line-height: 1.7;
+}
+
+/* ===== STATS ===== */
+.section-stats { padding: 80px 0 100px; background: #f8fafc; }
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+    max-width: 1100px;
     margin: 0 auto;
 }
 
@@ -298,6 +344,8 @@ img { max-width: 100%; height: auto; display: block; }
 .stat-card-blue { background: #F3F5FF; border-bottom-color: #B0BDFF; }
 .stat-card-orange { background: #FFF3E6; border-bottom-color: #FFC093; }
 .stat-card-purple { background: #FBEEFD; border-bottom-color: #F6BCFF; }
+.stat-card-green { background: #EEFBE6; border-bottom-color: #A3D977; }
+.stat-card-teal { background: #E6F7F7; border-bottom-color: #7DD4D4; }
 
 .stat-icon {
     font-size: 2rem;
@@ -466,9 +514,54 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 /* ===== PARTENAIRES ===== */
-.section-partenaires { padding: 60px 0; background: #f8fafc; }
+.section-partenaires { padding: 60px 0; background: #fff; }
 .partenaires-img-large { max-width: 800px; margin: 0 auto; border-radius: 16px; }
 .partenaires-img { max-width: 600px; margin: 0 auto; border-radius: 16px; }
+
+/* ===== CENTRES SOCIAUX ===== */
+.section-centres { padding: 60px 0 80px; background: #f8fafc; }
+
+.centres-subtitle {
+    text-align: center;
+    font-size: 1.05rem;
+    color: #666;
+    margin-top: -30px;
+    margin-bottom: 40px;
+}
+
+.centres-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.centre-card {
+    background: #fff;
+    padding: 24px 20px;
+    border-radius: 14px;
+    text-align: center;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+    border: 1px solid #eef2f7;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.centre-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+
+.centre-city {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #1e62c9;
+    margin-bottom: 6px;
+}
+
+.centre-card h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
 
 /* ===== CONTACT ===== */
 .contact-centered {
@@ -1131,6 +1224,8 @@ img { max-width: 100%; height: auto; display: block; }
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .mission-values { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .centres-grid { grid-template-columns: repeat(3, 1fr); }
     .action-card { grid-template-columns: 1fr; gap: 24px; }
     .action-reverse { direction: ltr; }
     .action-image img { height: 280px; }
@@ -1167,9 +1262,15 @@ img { max-width: 100%; height: auto; display: block; }
     .section { padding: 50px 0; }
     .section-title { font-size: 1.7rem; margin-bottom: 30px; }
 
+    .mission-values { grid-template-columns: 1fr; gap: 16px; }
+    .mission-text { font-size: 1rem; }
+
     .stats-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
     .stat-number { font-size: 2.4rem; }
     .stat-card { padding: 28px 16px 24px; }
+
+    .centres-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+    .centres-subtitle { font-size: 0.95rem; }
 
     .section-blue { padding-top: 70px; }
     .section-curve-top { height: 40px; }
@@ -1208,6 +1309,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 @media (max-width: 480px) {
     .stats-grid { grid-template-columns: 1fr; }
+    .centres-grid { grid-template-columns: 1fr; }
     .hero { height: 75vh; }
     .hero h1 { font-size: 2.1rem; }
     .hero-actions { flex-direction: column; align-items: center; }
