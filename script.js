@@ -75,8 +75,8 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, { threshold: 0.15 });
 
-document.querySelectorAll('.action-card, .stat-card, .footer-col').forEach(el => {
-    el.classList.add('fade-in');
+document.querySelectorAll('.fade-in, .stat-card, .footer-col, .testimonial-inner, .contact-form').forEach(el => {
+    if (!el.classList.contains('fade-in')) el.classList.add('fade-in');
     observer.observe(el);
 });
 

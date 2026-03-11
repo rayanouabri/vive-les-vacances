@@ -40,32 +40,41 @@
         <div class="hero-bg-wrapper">
             <img src="images/hero.jpg" alt="Photo de groupe Vive Les Vacances" class="hero-bg">
         </div>
+        <div class="hero-overlay"></div>
         <div class="hero-shape"></div>
         <div class="container hero-content">
+            <div class="hero-badge">Association lilloise depuis 1993</div>
             <h1>Vive Les Vacances !</h1>
             <p class="hero-subtitle">Parce que chaque enfant mérite de partir en vacances</p>
             <div class="hero-actions">
                 <a href="#qui" class="btn btn-white btn-lg">Découvrir l'association</a>
                 <a href="https://fr.ulule.com/vive-les-vacances-lille/" target="_blank" rel="noopener" class="btn btn-donate btn-lg">Faire un don</a>
             </div>
+            <div class="hero-scroll-hint">
+                <span>Défiler vers le bas</span>
+                <div class="scroll-arrow"></div>
+            </div>
         </div>
     </section>
 
     <!-- EN QUELQUES CHIFFRES -->
-    <section class="section" id="qui">
+    <section class="section section-stats" id="qui">
         <div class="container">
             <h2 class="section-title">Vive Les Vacances ! En quelques chiffres :</h2>
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card stat-card-blue">
+                    <div class="stat-icon">&#128218;</div>
                     <div class="stat-number" data-target="300">0</div>
                     <div class="stat-suffix">+</div>
                     <div class="stat-label">Enfants Accompagnés</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card stat-card-orange">
+                    <div class="stat-icon">&#127942;</div>
                     <div class="stat-number" data-target="7">0</div>
                     <div class="stat-label">Centres sociaux partenaires</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card stat-card-purple">
+                    <div class="stat-icon">&#9881;</div>
                     <div class="stat-number" data-target="32">0</div>
                     <div class="stat-label">Années de Vacances réussies</div>
                 </div>
@@ -75,72 +84,82 @@
 
     <!-- NOS ACTIONS -->
     <section class="section section-blue" id="nos">
+        <div class="section-curve-top"></div>
         <div class="container">
-            <h2 class="section-title text-white">Nos Actions</h2>
+            <div class="actions-header">
+                <img src="images/logo.png" alt="Logo VLV" class="floating-logo" width="100" height="98">
+                <h2 class="section-title text-white">Nos Actions</h2>
+            </div>
 
             <!-- Action 1 : Les Vacances VLV -->
-            <div class="action-card">
+            <div class="action-card fade-in">
                 <div class="action-image">
                     <img src="images/vacances1.jpg" alt="Les Vacances VLV" loading="lazy">
                 </div>
                 <div class="action-text">
                     <h3>Les vacances VLV!</h3>
                     <p>Depuis 1993, Vive les Vacances! organise de A à Z une semaine de vacances pour 100 enfants au mois d'avril, dont la destination change chaque année. Au programme : ateliers découvertes, sorties, activités sportives et culturelles, grands jeux, veillées et pièce de théâtre jouée par les bénévoles qui constitue l'imaginaire de la semaine.</p>
+                    <a href="evenements.html#vacances" class="btn btn-green btn-sm">En savoir plus</a>
                 </div>
             </div>
 
-            <!-- Action 2 : Accompagnement à la scolarité -->
-            <div class="action-card action-reverse">
+            <!-- Action 2 : Les Mini JOs -->
+            <div class="action-card action-reverse fade-in">
                 <div class="action-image">
-                    <img src="images/activite1.jpg" alt="Accompagnement scolaire" loading="lazy">
+                    <img src="images/minijo.jpg" alt="Les Mini JOs" loading="lazy">
+                </div>
+                <div class="action-text">
+                    <h3>Les Mini JOs</h3>
+                    <p>Les Mini JOs sont une journée de compétition sportive organisée pour les enfants des centres sociaux partenaires âgés de 8 à 12 ans, en partenariat avec l'association de l'EDHEC OJO. L'objectif ? 1) faire découvrir aux enfants la pratique du sport sous l'angle de ses valeurs, 2) les sensibiliser au handicap et à l'écologie, 3) faire en sorte qu'ils s'amusent ! En 2024, la 7ème édition a rassemblé plus de 100 enfants !</p>
+                    <a href="evenements.html#mini-jo" class="btn btn-green btn-sm">En savoir plus</a>
+                </div>
+            </div>
+
+            <!-- Action 3 : Accompagnement à la scolarité -->
+            <div class="action-card fade-in">
+                <div class="action-image">
+                    <img src="images/scolarite.jpeg" alt="Accompagnement scolaire" loading="lazy">
                 </div>
                 <div class="action-text">
                     <h3>L'accompagnement à la scolarité</h3>
                     <p>Accompagnement dans 7 centres sociaux : Bois Blancs, Moulins, La Busette, Marcel Bertrand (Lille), L'Alma, L'Hommelet (Roubaix), Larc Ensemble (Villeneuve d'Ascq). Chaque enfant est suivi toute l'année par le même bénévole pour un accompagnement personnalisé, notamment en français et en mathématiques.</p>
+                    <a href="evenements.html#scolarite" class="btn btn-green btn-sm">En savoir plus</a>
                 </div>
             </div>
 
-            <!-- Action 3 : Les suivis -->
-            <div class="action-card">
+            <!-- Action 4 : Les Suivis -->
+            <div class="action-card action-reverse fade-in">
                 <div class="action-image">
                     <img src="images/sortie1.jpg" alt="Les suivis - sorties du mercredi" loading="lazy">
                 </div>
                 <div class="action-text">
                     <h3>Les Suivis</h3>
                     <p>Sorties bimensuelles pour permettre aux enfants de quitter leur quartier et découvrir de nouveaux horizons, s'initier à des activités culturelles et sportives variées, et développer leur curiosité et leur ouverture d'esprit. Plus de 80 enfants ont participé à ces sorties en 2024-2025.</p>
-                </div>
-            </div>
-
-            <!-- Action 4 : Les Mini-Jo -->
-            <div class="action-card action-reverse">
-                <div class="action-image">
-                    <img src="images/minijo.jpg" alt="Les Mini-Jo" loading="lazy">
-                </div>
-                <div class="action-text">
-                    <h3>Les Mini JOs</h3>
-                    <p>Les Mini JOs sont une journée de compétition sportive organisée pour les enfants des centres sociaux partenaires âgés de 8 à 12 ans, en partenariat avec l'association de l'EDHEC OJO. L'objectif ? 1) faire découvrir aux enfants la pratique du sport sous l'angle de ses valeurs, 2) les sensibiliser au handicap et à l'écologie, 3) faire en sorte qu'ils s'amusent ! En 2024, la 7ème édition a rassemblé plus de 100 enfants !</p>
+                    <a href="evenements.html#suivis" class="btn btn-green btn-sm">En savoir plus</a>
                 </div>
             </div>
 
             <!-- Action 5 : Le WESKID -->
-            <div class="action-card">
+            <div class="action-card fade-in">
                 <div class="action-image">
                     <img src="images/weskid.jpeg" alt="Le WESKID - séjour au ski" loading="lazy">
                 </div>
                 <div class="action-text">
                     <h3>Le WESKID</h3>
                     <p>Du 2 au 5 janvier 2025 au Centre Le Chorin à Plainfaing (Hautes-Vosges), en partenariat avec le Ski Club EDHEC. 32 enfants des centres sociaux de Roubaix, Villeneuve d'Ascq et Lambersart ont découvert les sports d'hiver : ski, patinage, luge et veillées montagnardes. En 2026, ce séjour sera ouvert aux centres sociaux de Lille.</p>
+                    <a href="evenements.html#weskid" class="btn btn-green btn-sm">En savoir plus</a>
                 </div>
             </div>
 
             <!-- Action 6 : Les Petits Voileux -->
-            <div class="action-card action-reverse">
+            <div class="action-card action-reverse fade-in">
                 <div class="action-image">
                     <img src="images/voile1.jpg" alt="Les Petits Voileux" loading="lazy">
                 </div>
                 <div class="action-text">
                     <h3>Les Petits Voileux</h3>
                     <p>3ème édition organisée le 3 mai 2025 à la base nautique d'Hellemes, en partenariat avec le Club de Voile de l'EDHEC. 21 enfants des centres sociaux de l'Hommelet et de l'Alma ont découvert la voile : tour en bateau, pédalo, parcours pieds nus sensoriel, trampoline, tyrolienne et balade autour du lac.</p>
+                    <a href="evenements.html#petits-voileux" class="btn btn-green btn-sm">En savoir plus</a>
                 </div>
             </div>
         </div>
@@ -155,14 +174,22 @@
             <div class="testimonial-content">
                 <div class="testimonial-badge">Plus de 40 membres par an</div>
                 <blockquote>
-                    "Chaque séance d'aide aux devoirs, chaque sortie, chaque semaine de vacances nous rappelle pourquoi VLV existe : pour créer des moments de joie, de curiosité et de partage."
+                    &laquo; Chaque séance d'aide aux devoirs, chaque sortie, chaque semaine de vacances nous rappelle pourquoi VLV existe : pour créer des moments de joie, de curiosité et de partage. &raquo;
                 </blockquote>
                 <div class="testimonial-author">
                     <strong>BEUCHON Janelle</strong>
                     <span>Présidente de l'association Vive Les Vacances !</span>
                 </div>
-                <p class="testimonial-desc">Une association solidaire et unie.</p>
             </div>
+        </div>
+    </section>
+
+    <!-- PARTENAIRES -->
+    <section class="section section-partenaires">
+        <div class="container" style="text-align:center;">
+            <h2 class="section-title">Nos Partenaires</h2>
+            <img src="images/partenaires-large.png" alt="Nos partenaires" class="partenaires-img-large" loading="lazy"
+                 onerror="this.src='images/partenaires.png'; this.classList.add('partenaires-img');">
         </div>
     </section>
 
@@ -170,29 +197,23 @@
     <section class="section section-light" id="nous">
         <div class="container">
             <h2 class="section-title">Nous Contacter</h2>
-            <div class="contact-grid">
-                <div class="contact-form-wrapper">
-                    <form class="contact-form" id="contactForm">
-                        <div class="form-row">
-                            <input type="text" placeholder="Prénom" required maxlength="100">
-                            <input type="text" placeholder="Nom" required maxlength="100">
-                        </div>
-                        <input type="email" placeholder="Email" required maxlength="100">
-                        <select required>
-                            <option value="" disabled selected>Sur quel sujet porte votre demande ?</option>
-                            <option value="evenement">Évenement VLV</option>
-                            <option value="subvention">Subvention et défiscalisation</option>
-                            <option value="partenariat">Partenariat divers</option>
-                            <option value="autre">Autre</option>
-                        </select>
-                        <textarea placeholder="Message" required maxlength="2000" rows="5"></textarea>
-                        <button type="submit" class="btn btn-primary">Envoyer</button>
-                    </form>
-                </div>
-                <div class="contact-info">
-                    <h3>Plus de 22 Partenaires</h3>
-                    <img src="images/partenaires.png" alt="Nos partenaires" class="partenaires-img" loading="lazy">
-                </div>
+            <div class="contact-centered">
+                <form class="contact-form" id="contactForm">
+                    <div class="form-row">
+                        <input type="text" placeholder="Prénom" required maxlength="100">
+                        <input type="text" placeholder="Nom" required maxlength="100">
+                    </div>
+                    <input type="email" placeholder="Email" required maxlength="100">
+                    <select required>
+                        <option value="" disabled selected>Sur quel sujet porte votre demande ?</option>
+                        <option value="evenement">Évenement VLV</option>
+                        <option value="subvention">Subvention et défiscalisation</option>
+                        <option value="partenariat">Partenariat divers</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                    <textarea placeholder="Message" required maxlength="2000" rows="5"></textarea>
+                    <button type="submit" class="btn btn-primary btn-lg">Envoyer</button>
+                </form>
             </div>
         </div>
     </section>
