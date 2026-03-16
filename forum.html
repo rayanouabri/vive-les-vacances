@@ -43,7 +43,7 @@
     <section class="forum-hero">
         <div class="container">
             <h1>Forum des Parents</h1>
-            <p>Échangez avec d'autres parents, partagez vos expériences et posez vos questions</p>
+            <p>Partagez vos posts, vos photos et vos retours comme sur un vrai fil communautaire</p>
         </div>
     </section>
 
@@ -77,7 +77,24 @@
                     </div>
                     <input type="password" id="postAccessCode" placeholder="Code d'accès pour publier" required maxlength="64" autocomplete="off">
                     <input type="text" id="topicTitle" placeholder="Titre du sujet" required maxlength="120">
-                    <textarea id="topicContent" placeholder="Votre message..." required maxlength="2000" rows="4"></textarea>
+                    <textarea id="topicContent" placeholder="Votre post..." required maxlength="2000" rows="4"></textarea>
+                    <div class="composer-tools">
+                        <button type="button" class="composer-tool-btn" id="emojiToggle">😊 Emoji</button>
+                        <label for="topicPhotos" class="composer-tool-btn">📷 Ajouter des photos</label>
+                        <input type="file" id="topicPhotos" accept="image/*" multiple hidden>
+                        <span class="composer-help">Jusqu'a 2 photos par post</span>
+                    </div>
+                    <div class="emoji-panel" id="emojiPanel" hidden>
+                        <button type="button" class="emoji-btn" data-emoji="😀">😀</button>
+                        <button type="button" class="emoji-btn" data-emoji="😍">😍</button>
+                        <button type="button" class="emoji-btn" data-emoji="👏">👏</button>
+                        <button type="button" class="emoji-btn" data-emoji="❤️">❤️</button>
+                        <button type="button" class="emoji-btn" data-emoji="🎉">🎉</button>
+                        <button type="button" class="emoji-btn" data-emoji="🏖️">🏖️</button>
+                        <button type="button" class="emoji-btn" data-emoji="🙏">🙏</button>
+                        <button type="button" class="emoji-btn" data-emoji="🌟">🌟</button>
+                    </div>
+                    <div class="photo-preview" id="photoPreview"></div>
                     <button type="submit" class="btn btn-primary">
                         <span class="btn-text">Publier le sujet</span>
                         <span class="btn-loader" style="display:none;"></span>

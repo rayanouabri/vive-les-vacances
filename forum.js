@@ -83,6 +83,9 @@ const categoryLabels = {
     entraide: '🤝 Entraide'
 };
 
+const MAX_POST_PHOTOS = 2;
+let selectedPostImages = [];
+
 function formatDate(timestamp) {
     if (!timestamp) return '';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -99,15 +102,118 @@ function sanitize(str) {
     return div.innerHTML;
 }
 
-// ===== Render topic =====
-function renderTopic(topic, id) {
-    const replies = topic.replies || [];
-    const repliesHtml = replies.map(r => `
-        <div class="forum-reply">
-            <div class="forum-reply-meta"><strong>${sanitize(r.author)}</strong> — ${formatDate(r.date)}</div>
-            <p>${sanitize(r.content)}</p>
+function formatPostContent(str) {
+    return sanitize(str).replace(/\n/g, '<br>');
+}
+
+function renderPhotoPreview() {
+    const preview = document.getElementById('photoPreview');
+    if (!preview) return;
+    if (!selectedPostImages.length) {
+        preview.innerHTML = '';
+        return;
+    }
+
+    preview.innerHTML = selectedPostImages.map((src, index) => `
+        <div class="photo-thumb">
+            <img src="${src}" alt="Photo a publier ${index + 1}">
+            <button type="button" class="remove-photo-btn" data-remove-index="${index}" aria-label="Supprimer la photo">×</button>
         </div>
     `).join('');
+}
+
+function compressImage(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const img = new Image();
+            img.onload = () => {
+                const maxW = 1280;
+                const maxH = 1280;
+                let w = img.width;
+                let h = img.height;
+                const ratio = Math.min(maxW / w, maxH / h, 1);
+                w = Math.round(w * ratio);
+                h = Math.round(h * ratio);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+
+                const out = canvas.toDataURL('image/jpeg', 0.76);
+                resolve(out);
+            };
+            img.onerror = reject;
+            img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+function initPostComposer() {
+    const emojiToggle = document.getElementById('emojiToggle');
+    const emojiPanel = document.getElementById('emojiPanel');
+    const content = document.getElementById('topicContent');
+    const photosInput = document.getElementById('topicPhotos');
+    const preview = document.getElementById('photoPreview');
+
+    if (!emojiToggle || !emojiPanel || !content || !photosInput || !preview) return;
+
+    emojiToggle.addEventListener('click', () => {
+        emojiPanel.hidden = !emojiPanel.hidden;
+    });
+
+    emojiPanel.addEventListener('click', (e) => {
+        const btn = e.target.closest('.emoji-btn');
+        if (!btn) return;
+        content.value += btn.dataset.emoji || '';
+        content.focus();
+    });
+
+    photosInput.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files || []).filter(f => f.type.startsWith('image/'));
+        if (!files.length) return;
+
+        const remaining = MAX_POST_PHOTOS - selectedPostImages.length;
+        if (remaining <= 0) {
+            showToast(`Maximum ${MAX_POST_PHOTOS} photos par post`, 'info');
+            photosInput.value = '';
+            return;
+        }
+
+        const toProcess = files.slice(0, remaining);
+        try {
+            const compressed = await Promise.all(toProcess.map(compressImage));
+            selectedPostImages = selectedPostImages.concat(compressed);
+            renderPhotoPreview();
+            if (files.length > remaining) showToast(`Seules ${MAX_POST_PHOTOS} photos sont autorisees`, 'info');
+        } catch {
+            showToast('Impossible de traiter une photo', 'error');
+        }
+        photosInput.value = '';
+    });
+
+    preview.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-remove-index]');
+        if (!btn) return;
+        const index = parseInt(btn.dataset.removeIndex, 10);
+        if (Number.isNaN(index)) return;
+        selectedPostImages.splice(index, 1);
+        renderPhotoPreview();
+    });
+}
+
+// ===== Render topic =====
+function renderTopic(topic, id) {
+    const media = Array.isArray(topic.media) ? topic.media : [];
+    const mediaHtml = media.length ? `
+        <div class="forum-topic-media">
+            ${media.map((src, i) => `<img src="${src}" alt="Photo du post ${i + 1}">`).join('')}
+        </div>
+    ` : '';
 
     return `
         <div class="forum-topic" data-category="${topic.category}" data-id="${id}">
@@ -116,27 +222,10 @@ function renderTopic(topic, id) {
                 <span class="forum-topic-badge badge-${topic.category}">${categoryLabels[topic.category] || topic.category}</span>
             </div>
             <div class="forum-topic-meta">Par <strong>${sanitize(topic.author)}</strong> — ${formatDate(topic.createdAt)}</div>
-            <div class="forum-topic-content">${sanitize(topic.content)}</div>
-            ${replies.length > 0 ? `
-                <button class="forum-toggle-replies" onclick="toggleReplies('${id}')">
-                    💬 ${replies.length} réponse${replies.length > 1 ? 's' : ''}
-                </button>
-                <div class="forum-replies" id="replies-${id}" style="display:none;">
-                    ${repliesHtml}
-                </div>
-            ` : ''}
-            <div class="reply-form">
-                <input type="text" placeholder="Prénom" maxlength="50" id="replyAuthor-${id}">
-                <textarea placeholder="Votre réponse..." maxlength="1000" id="replyContent-${id}"></textarea>
-                <button onclick="addReply('${id}')">Répondre</button>
-            </div>
+            <div class="forum-topic-content">${formatPostContent(topic.content)}</div>
+            ${mediaHtml}
         </div>
     `;
-}
-
-function toggleReplies(id) {
-    const el = document.getElementById(`replies-${id}`);
-    if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 // ===== Toggle form =====
@@ -215,9 +304,9 @@ function loadLocalTopics() {
     let topics = getLocalTopics();
     if (topics.length === 0) {
         topics = [
-            { id: 'demo1', author: 'Sophie', title: 'Premier séjour à la mer !', content: 'Mon fils de 7 ans a vu la mer pour la première fois grâce à VLV. Il était tellement heureux !', category: 'vacances', createdAt: new Date(Date.now() - 86400000).toISOString(), replies: [] },
-            { id: 'demo2', author: 'Fatima', title: 'Conseils pour préparer les valises', content: "C'est notre premier départ. Qu'est-ce que vous conseillez de mettre dans les valises ?", category: 'conseils', createdAt: new Date(Date.now() - 172800000).toISOString(), replies: [{ author: 'Marie', content: 'Pense à la crème solaire et aux chapeaux !', date: new Date(Date.now() - 100000000).toISOString() }] },
-            { id: 'demo3', author: 'Karim', title: 'Merci à toute l\'équipe !', content: 'Un grand merci aux bénévoles. Mes 3 enfants ont des souvenirs incroyables.', category: 'general', createdAt: new Date(Date.now() - 259200000).toISOString(), replies: [] }
+            { id: 'demo1', author: 'Sophie', title: 'Premier séjour à la mer !', content: 'Mon fils de 7 ans a vu la mer pour la première fois grâce à VLV. Il était tellement heureux ! 😍', category: 'vacances', createdAt: new Date(Date.now() - 86400000).toISOString(), media: [] },
+            { id: 'demo2', author: 'Fatima', title: 'Conseils pour préparer les valises', content: "C'est notre premier départ. Qu'est-ce que vous conseillez de mettre dans les valises ?", category: 'conseils', createdAt: new Date(Date.now() - 172800000).toISOString(), media: [] },
+            { id: 'demo3', author: 'Karim', title: 'Merci à toute l\'équipe !', content: 'Un grand merci aux bénévoles. Mes 3 enfants ont des souvenirs incroyables. 👏', category: 'general', createdAt: new Date(Date.now() - 259200000).toISOString(), media: [] }
         ];
         saveLocalTopics(topics);
     }
@@ -256,17 +345,22 @@ document.getElementById('forumForm').addEventListener('submit', async (e) => {
     try {
         if (firebaseReady) {
             await db.collection('topics').add({
-                author, title, content, category,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                replies: []
+                author,
+                title,
+                content,
+                category,
+                media: selectedPostImages,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         } else {
             const topics = getLocalTopics();
-            topics.unshift({ id: 'topic_' + Date.now(), author, title, content, category, createdAt: new Date().toISOString(), replies: [] });
+            topics.unshift({ id: 'topic_' + Date.now(), author, title, content, category, media: selectedPostImages, createdAt: new Date().toISOString() });
             saveLocalTopics(topics);
             loadLocalTopics();
         }
         e.target.reset();
+        selectedPostImages = [];
+        renderPhotoPreview();
         toggleNewTopicForm();
         showToast('Sujet publié avec succès !');
     } catch (err) {
@@ -279,42 +373,10 @@ document.getElementById('forumForm').addEventListener('submit', async (e) => {
     if (btnLoader) btnLoader.style.display = 'none';
 });
 
-// ===== Add reply =====
-async function addReply(topicId) {
-    const authorInput = document.getElementById(`replyAuthor-${topicId}`);
-    const contentInput = document.getElementById(`replyContent-${topicId}`);
-    const author = authorInput.value.trim();
-    const content = contentInput.value.trim();
-    if (!author || !content) { showToast('Remplis ton prénom et ta réponse', 'info'); return; }
-
-    const reply = { author, content, date: new Date().toISOString() };
-
-    try {
-        if (firebaseReady) {
-            await db.collection('topics').doc(topicId).update({
-                replies: firebase.firestore.FieldValue.arrayUnion(reply)
-            });
-        } else {
-            const topics = getLocalTopics();
-            const topic = topics.find(t => t.id === topicId);
-            if (topic) { topic.replies.push(reply); saveLocalTopics(topics); loadLocalTopics(); }
-        }
-        authorInput.value = '';
-        contentInput.value = '';
-        showToast('Réponse ajoutée !');
-        const repliesEl = document.getElementById(`replies-${topicId}`);
-        if (repliesEl) repliesEl.style.display = 'block';
-    } catch (err) {
-        console.error(err);
-        showToast("Erreur lors de l'envoi", 'error');
-    }
-}
-
 // ===== Init =====
+initPostComposer();
 if (firebaseReady) { initFirebaseForum(); }
 else { fallbackToLocalStorage(); }
 
 // ===== Expose globals =====
 window.toggleNewTopicForm = toggleNewTopicForm;
-window.toggleReplies = toggleReplies;
-window.addReply = addReply;
