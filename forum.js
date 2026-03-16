@@ -1,4 +1,4 @@
-// ===== Vive Les Vacances ! ! - Forum (Firebase Firestore) =====
+﻿// ===== Vive Les Vacances ! ! - Forum (Firebase Firestore) =====
 
 const forumConfig = window.VLV_FORUM_CONFIG || {};
 const firebaseConfig = forumConfig.firebase || {
@@ -120,8 +120,7 @@ async function uploadPostImage(dataUrl, index) {
     const path = `forum-posts/${Date.now()}-${Math.random().toString(36).slice(2)}-${index}.jpg`;
     const ref = storage.ref().child(path);
     const snap = await ref.putString(dataUrl, 'data_url');
-    return snap.ref.getDownloadURL();
-}
+    return snap.ref.getDownloadURL();`r`n}`r`n`r`nfunction isStorageCorsError(err) {`r`n    const msg = (err && (err.message || err.code || '')).toString().toLowerCase();`r`n    return msg.includes('cors') || msg.includes('failed to fetch') || msg.includes('network-request-failed');`r`n}
 
 function renderPhotoPreview() {
     const preview = document.getElementById('photoPreview');
@@ -359,40 +358,7 @@ document.getElementById('forumForm').addEventListener('submit', async (e) => {
     if (btnText) btnText.textContent = 'Publication...';
     if (btnLoader) btnLoader.style.display = 'inline-block';
 
-    try {
-        if (firebaseReady) {
-            let media = selectedPostImages;
-            if (selectedPostImages.length && storageReady) {
-                media = await Promise.all(selectedPostImages.map((src, idx) => uploadPostImage(src, idx)));
-            }
-
-            await db.collection('topics').add({
-                author,
-                title,
-                content,
-                category,
-                media,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        } else {
-            const topics = getLocalTopics();
-            topics.unshift({ id: 'topic_' + Date.now(), author, title, content, category, media: selectedPostImages, createdAt: new Date().toISOString() });
-            saveLocalTopics(topics);
-            loadLocalTopics();
-        }
-        e.target.reset();
-        selectedPostImages = [];
-        renderPhotoPreview();
-        toggleNewTopicForm();
-        showToast('Sujet publié avec succès !');
-    } catch (err) {
-        console.error(err);
-        showToast('Erreur lors de la publication', 'error');
-    }
-
-    btn.disabled = false;
-    if (btnText) btnText.textContent = 'Publier le sujet';
-    if (btnLoader) btnLoader.style.display = 'none';
+    try {`r`n        if (firebaseReady) {`r`n            let media = selectedPostImages.slice();`r`n`r`n            if (selectedPostImages.length && storageReady) {`r`n                const uploaded = await Promise.allSettled(`r`n                    selectedPostImages.map((src, idx) => uploadPostImage(src, idx))`r`n                );`r`n`r`n                const okUrls = uploaded`r`n                    .filter((r) => r.status === 'fulfilled')`r`n                    .map((r) => r.value);`r`n`r`n                const failed = uploaded.filter((r) => r.status === 'rejected');`r`n`r`n                if (failed.length && !okUrls.length) {`r`n                    const corsLike = failed.some((r) => isStorageCorsError(r.reason));`r`n                    media = [];`r`n                    showToast(`r`n                        corsLike`r`n                            ? 'Photos non envoyees (regles Firebase/CORS). Sujet publie sans photo.'`r`n                            : 'Photos non envoyees. Sujet publie sans photo.',`r`n                        'info'`r`n                    );`r`n                } else if (failed.length && okUrls.length) {`r`n                    media = okUrls;`r`n                    showToast('Certaines photos ont echoue. Sujet publie avec les photos valides.', 'info');`r`n                } else {`r`n                    media = okUrls;`r`n                }`r`n            }`r`n`r`n            await db.collection('topics').add({`r`n                author,`r`n                title,`r`n                content,`r`n                category,`r`n                media,`r`n                createdAt: firebase.firestore.FieldValue.serverTimestamp()`r`n            });`r`n        } else {`r`n            const topics = getLocalTopics();`r`n            topics.unshift({ id: 'topic_' + Date.now(), author, title, content, category, media: selectedPostImages, createdAt: new Date().toISOString() });`r`n            saveLocalTopics(topics);`r`n            loadLocalTopics();`r`n        }`r`n        e.target.reset();`r`n        selectedPostImages = [];`r`n        renderPhotoPreview();`r`n        toggleNewTopicForm();`r`n        showToast('Sujet publie avec succes !');`r`n    } catch (err) {`r`n        console.error(err);`r`n        showToast('Erreur lors de la publication', 'error');`r`n    } finally {`r`n        btn.disabled = false;`r`n        if (btnText) btnText.textContent = 'Publier le sujet';`r`n        if (btnLoader) btnLoader.style.display = 'none';`r`n    }
 });
 
 // ===== Init =====
@@ -402,3 +368,4 @@ else { fallbackToLocalStorage(); }
 
 // ===== Expose globals =====
 window.toggleNewTopicForm = toggleNewTopicForm;
+
