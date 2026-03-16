@@ -393,21 +393,21 @@ img { max-width: 100%; height: auto; display: block; }
 
 .actions-header {
     text-align: center;
-    margin-bottom: 44px;
+    margin-bottom: 34px;
     position: relative;
 }
 
 .floating-logo {
     display: block;
-    margin: -78px auto 10px;
+    margin: -118px auto 18px;
     position: relative;
     z-index: 3;
-    background: #fff;
-    padding: 10px;
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 16px;
+    background: transparent;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
     animation: float 4s ease-in-out infinite;
-    filter: drop-shadow(0 8px 25px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 10px 24px rgba(0,0,0,0.14));
 }
 
 .action-card {
@@ -1387,8 +1387,8 @@ img { max-width: 100%; height: auto; display: block; }
     .floating-logo {
         width: 70px;
         height: auto;
-        margin: -52px auto 6px;
-        padding: 8px;
+        margin: -78px auto 10px;
+        padding: 0;
     }
     .action-card { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
     .action-reverse { direction: ltr; }
