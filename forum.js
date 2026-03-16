@@ -15,6 +15,8 @@ const POST_CREATION_CODE = (forumConfig.postCreationCode || "").trim();
 
 let db = null;
 let firebaseReady = false;
+let storage = null;
+let storageReady = false;
 
 try {
     const hasRealFirebaseConfig =
@@ -25,6 +27,12 @@ try {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         firebaseReady = true;
+        try {
+            storage = firebase.storage();
+            storageReady = true;
+        } catch (storageError) {
+            console.warn('Firebase Storage non configure:', storageError.message);
+        }
     } else {
         console.warn('Firebase non configure: forum en mode local.');
     }
@@ -83,7 +91,7 @@ const categoryLabels = {
     entraide: '🤝 Entraide'
 };
 
-const MAX_POST_PHOTOS = 2;
+const MAX_POST_PHOTOS = 20;
 let selectedPostImages = [];
 
 function formatDate(timestamp) {
@@ -104,6 +112,15 @@ function sanitize(str) {
 
 function formatPostContent(str) {
     return sanitize(str).replace(/\n/g, '<br>');
+}
+
+async function uploadPostImage(dataUrl, index) {
+    if (!storageReady || !storage) return dataUrl;
+
+    const path = `forum-posts/${Date.now()}-${Math.random().toString(36).slice(2)}-${index}.jpg`;
+    const ref = storage.ref().child(path);
+    const snap = await ref.putString(dataUrl, 'data_url');
+    return snap.ref.getDownloadURL();
 }
 
 function renderPhotoPreview() {
@@ -344,12 +361,17 @@ document.getElementById('forumForm').addEventListener('submit', async (e) => {
 
     try {
         if (firebaseReady) {
+            let media = selectedPostImages;
+            if (selectedPostImages.length && storageReady) {
+                media = await Promise.all(selectedPostImages.map((src, idx) => uploadPostImage(src, idx)));
+            }
+
             await db.collection('topics').add({
                 author,
                 title,
                 content,
                 category,
-                media: selectedPostImages,
+                media,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         } else {
