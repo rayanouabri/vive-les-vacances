@@ -1,4 +1,4 @@
-// ===== Vive Les Vacances - Script principal (index.html) =====
+// ===== Vive Les Vacances ! ! - Script principal (index.html) =====
 
 // Header scroll
 const header = document.getElementById('header');

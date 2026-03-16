@@ -1,4 +1,4 @@
-// ===== Vive Les Vacances - Forum (Firebase Firestore) =====
+// ===== Vive Les Vacances ! ! - Forum (Firebase Firestore) =====
 
 const forumConfig = window.VLV_FORUM_CONFIG || {};
 const firebaseConfig = forumConfig.firebase || {
