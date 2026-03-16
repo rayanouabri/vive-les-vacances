@@ -79,7 +79,7 @@ window.addEventListener('scroll', () => {
         const id = s.getAttribute('id');
         if (y >= top && y < top + s.offsetHeight) {
             navLinks.forEach(l => l.classList.remove('active'));
-            const a = document.querySelector(.nav-link[href="#"]);
+            const a = document.querySelector('.nav-link[href="#' + id + '"]');
             if (a) a.classList.add('active');
         }
     });
@@ -117,6 +117,11 @@ document.querySelectorAll('.fade-in, .stat-card, .footer-col, .testimonial-inner
     observer.observe(el);
 });
 
+// Fallback: keep sections visible even if an observer callback fails.
+setTimeout(() => {
+    document.querySelectorAll('.fade-in').forEach((el) => el.classList.add('visible'));
+}, 1200);
+
 // Counter trigger
 let countersDone = false;
 const statsSection = document.querySelector('.section-stats');
@@ -138,3 +143,5 @@ if (contactForm) {
         contactForm.reset();
     });
 }
+
+
