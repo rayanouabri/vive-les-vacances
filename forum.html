@@ -75,6 +75,7 @@
                             <option value="entraide">🤝 Entraide</option>
                         </select>
                     </div>
+                    <input type="password" id="postAccessCode" placeholder="Code d'accès pour publier" required maxlength="64" autocomplete="off">
                     <input type="text" id="topicTitle" placeholder="Titre du sujet" required maxlength="120">
                     <textarea id="topicContent" placeholder="Votre message..." required maxlength="2000" rows="4"></textarea>
                     <button type="submit" class="btn btn-primary">
@@ -129,6 +130,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="forum-config.js"></script>
     <script src="forum.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 // ===== Vive Les Vacances - Forum (Firebase Firestore) =====
 
-// Firebase config — REMPLACE par tes vraies valeurs
-const firebaseConfig = {
+const forumConfig = window.VLV_FORUM_CONFIG || {};
+const firebaseConfig = forumConfig.firebase || {
     apiKey: "REMPLACE_PAR_TA_CLE_API",
     authDomain: "REMPLACE.firebaseapp.com",
     projectId: "REMPLACE_PAR_TON_PROJECT_ID",
@@ -10,13 +10,24 @@ const firebaseConfig = {
     appId: "1:123456789:web:abcdef"
 };
 
+// Code requis uniquement pour publier un sujet.
+const POST_CREATION_CODE = (forumConfig.postCreationCode || "").trim();
+
 let db = null;
 let firebaseReady = false;
 
 try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    firebaseReady = true;
+    const hasRealFirebaseConfig =
+        firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('REMPLACE') &&
+        firebaseConfig.projectId && !firebaseConfig.projectId.includes('REMPLACE');
+
+    if (hasRealFirebaseConfig) {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        firebaseReady = true;
+    } else {
+        console.warn('Firebase non configure: forum en mode local.');
+    }
 } catch (e) {
     console.warn("Firebase non configuré — mode démo:", e.message);
 }
@@ -219,10 +230,21 @@ function loadLocalTopics() {
 document.getElementById('forumForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const author = document.getElementById('authorName').value.trim();
+    const accessCode = document.getElementById('postAccessCode').value.trim();
     const title = document.getElementById('topicTitle').value.trim();
     const content = document.getElementById('topicContent').value.trim();
     const category = document.getElementById('topicCategory').value;
     if (!author || !title || !content) return;
+
+    if (!POST_CREATION_CODE || POST_CREATION_CODE === 'CHANGE_ME') {
+        showToast('Code de publication non configure. Modifie forum-config.js', 'error');
+        return;
+    }
+
+    if (accessCode !== POST_CREATION_CODE) {
+        showToast('Code incorrect: publication refusee', 'error');
+        return;
+    }
 
     const btn = e.target.querySelector('button[type="submit"]');
     const btnText = btn.querySelector('.btn-text');
