@@ -1,4 +1,41 @@
-// ===== Vive Les Vacances ! ! - Script principal (index.html) =====
+﻿// ===== Vive Les Vacances ! - Script principal (index.html) =====
+
+function normalizeBrandingText(value) {
+    return value
+        .replace(/Vive\s+les\s+Vacances\s*!+/gi, 'Vive Les Vacances !')
+        .replace(/Vive\s+Les\s+Vacances(?:\s*!\s*){2,}/g, 'Vive Les Vacances !');
+}
+
+function sanitizeBranding(root = document.body) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+
+    while (walker.nextNode()) {
+        textNodes.push(walker.currentNode);
+    }
+
+    textNodes.forEach((node) => {
+        const nextValue = normalizeBrandingText(node.nodeValue || '');
+        if (nextValue !== node.nodeValue) {
+            node.nodeValue = nextValue;
+        }
+    });
+
+    if (document.title) {
+        document.title = normalizeBrandingText(document.title);
+    }
+
+    document.querySelectorAll('img[alt], meta[content]').forEach((element) => {
+        if (element.hasAttribute('alt')) {
+            element.setAttribute('alt', normalizeBrandingText(element.getAttribute('alt') || ''));
+        }
+        if (element.hasAttribute('content')) {
+            element.setAttribute('content', normalizeBrandingText(element.getAttribute('content') || ''));
+        }
+    });
+}
+
+sanitizeBranding();
 
 // Header scroll
 const header = document.getElementById('header');
@@ -42,7 +79,7 @@ window.addEventListener('scroll', () => {
         const id = s.getAttribute('id');
         if (y >= top && y < top + s.offsetHeight) {
             navLinks.forEach(l => l.classList.remove('active'));
-            const a = document.querySelector(`.nav-link[href="#${id}"]`);
+            const a = document.querySelector(.nav-link[href="#"]);
             if (a) a.classList.add('active');
         }
     });
