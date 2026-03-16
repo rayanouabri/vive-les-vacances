@@ -393,12 +393,18 @@ img { max-width: 100%; height: auto; display: block; }
 
 .actions-header {
     text-align: center;
-    margin-bottom: 60px;
+    margin-bottom: 44px;
     position: relative;
 }
 
 .floating-logo {
-    margin: -14px auto 20px;
+    display: block;
+    margin: -78px auto 10px;
+    position: relative;
+    z-index: 3;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid rgba(0,0,0,0.08);
     border-radius: 16px;
     animation: float 4s ease-in-out infinite;
     filter: drop-shadow(0 8px 25px rgba(0,0,0,0.2));
@@ -1378,7 +1384,12 @@ img { max-width: 100%; height: auto; display: block; }
 
     .section-blue { padding-top: 70px; }
     .section-curve-top { height: 40px; }
-    .floating-logo { width: 70px; height: auto; }
+    .floating-logo {
+        width: 70px;
+        height: auto;
+        margin: -52px auto 6px;
+        padding: 8px;
+    }
     .action-card { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
     .action-reverse { direction: ltr; }
     .action-image img { height: 220px; }
