@@ -280,7 +280,8 @@
                         <option value="partenariat">Partenariat divers</option>
                         <option value="autre">Autre</option>
                     </select>
-                    <textarea placeholder="Message" required maxlength="2000" rows="5"></textarea>
+                    <textarea id="contactMessage" name="message" placeholder="Message" required maxlength="2000" rows="5"></textarea>
+                    <input type="text" id="contactWebsite" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" value="">
                     <button type="submit" class="btn btn-primary btn-lg">Envoyer</button>
                 </form>
             </div>
@@ -337,6 +338,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
