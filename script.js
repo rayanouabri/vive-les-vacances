@@ -1,6 +1,11 @@
-﻿// ===== Vive Les Vacances ! - Script principal (index.html) =====
+// ===== Vive Les Vacances ! - Script principal (index.html) =====
 
-function normalizeBrandingText(value) {`r`n    return value`r`n        .replace(/`r`n/g, ' ')`r`n        .replace(/Vive\s+les\s+Vacances\s*!+/gi, 'Vive Les Vacances !')`r`n        .replace(/Vive\s+Les\s+Vacances(?:\s*!\s*){2,}/g, 'Vive Les Vacances !');`r`n}
+function normalizeBrandingText(value) {
+    return value
+        .replace(/\\r?\\n/g, ' ')
+        .replace(/Vive\s+les\s+Vacances\s*!+/gi, 'Vive Les Vacances !')
+        .replace(/Vive\s+Les\s+Vacances(?:\s*!\s*){2,}/g, 'Vive Les Vacances !');
+}
 
 function sanitizeBranding(root = document.body) {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);

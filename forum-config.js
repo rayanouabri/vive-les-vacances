@@ -2,13 +2,15 @@
 // Remplis ce fichier avant mise en production.
 
 window.VLV_FORUM_CONFIG = {
-    // Mode recommande: "local" (sans API) tant que la securite Firebase n'est pas terminee.
-    // Passe a "firebase" uniquement quand les regles Firestore/Storage et restrictions API sont en place.
-    mode: "local",
+    // Mode recommande: "server" pour un forum public sans cle API exposee.
+    mode: "server",
+
+    // API serveur WordPress pour le forum public.
+    apiBaseUrl: "https://vive-les-vacances.fr/wp-json/vlv-forum/v1",
 
     // Code requis pour publier un nouveau sujet.
-    // Les reponses restent ouvertes a tous.
-    postCreationCode: "Six-Seven",
+    // En mode serveur, la verification du code se fait cote PHP.
+    postCreationCode: "",
 
     // Active l'upload photo Firebase Storage uniquement en mode "firebase".
     storageUploads: false,

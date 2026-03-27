@@ -1,25 +1,30 @@
-﻿// ===== Vive Les Vacances ! - Forum (Firebase Firestore) =====
-
 const forumConfig = window.VLV_FORUM_CONFIG || {};
 const forumMode = (forumConfig.mode || 'local').toLowerCase();
+const apiBaseUrl = (forumConfig.apiBaseUrl || '').replace(/\/$/, '');
+const firebaseConfig = forumConfig.firebase || {};
+const POST_CREATION_CODE = (forumConfig.postCreationCode || '').trim();
+const wantsServerMode = forumMode === 'server' && Boolean(apiBaseUrl);
 const wantsFirebaseMode = forumMode === 'firebase';
 const allowStorageUploads = wantsFirebaseMode && forumConfig.storageUploads === true;
-
-const firebaseConfig = forumConfig.firebase || {
-    apiKey: 'REMPLACE_PAR_TA_CLE_API',
-    authDomain: 'REMPLACE.firebaseapp.com',
-    projectId: 'REMPLACE_PAR_TON_PROJECT_ID',
-    storageBucket: 'REMPLACE.appspot.com',
-    messagingSenderId: '123456789',
-    appId: '1:123456789:web:abcdef'
-};
-
-const POST_CREATION_CODE = (forumConfig.postCreationCode || '').trim();
 
 let db = null;
 let firebaseReady = false;
 let storage = null;
 let storageReady = false;
+let selectedPostImages = [];
+let currentFilter = 'all';
+let forumRefreshTimer = null;
+
+const MAX_POST_PHOTOS = 4;
+const MAX_PHOTO_BYTES = 1200000;
+const categoryLabels = {
+    general: 'Discussion',
+    vacances: 'Vacances',
+    conseils: 'Conseils',
+    entraide: 'Entraide',
+    annonces: 'Annonces',
+    idees: 'Idees'
+};
 
 try {
     const hasRealFirebaseConfig =
@@ -28,11 +33,10 @@ try {
         firebaseConfig.authDomain && !firebaseConfig.authDomain.includes('REMPLACE') &&
         firebaseConfig.appId && !firebaseConfig.appId.includes('REMPLACE');
 
-    if (wantsFirebaseMode && hasRealFirebaseConfig) {
+    if (wantsFirebaseMode && hasRealFirebaseConfig && window.firebase) {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         firebaseReady = true;
-
         if (allowStorageUploads) {
             try {
                 storage = firebase.storage();
@@ -41,13 +45,9 @@ try {
                 console.warn('Firebase Storage non configure:', storageError.message);
             }
         }
-    } else if (wantsFirebaseMode && !hasRealFirebaseConfig) {
-        console.warn('Mode firebase demande mais config incomplete: mode local active.');
-    } else {
-        console.warn('Forum en mode local (sans API).');
     }
-} catch (e) {
-    console.warn('Firebase non configure — mode local:', e.message);
+} catch (error) {
+    console.warn('Initialisation Firebase impossible:', error.message);
 }
 
 function showToast(message, type = 'success') {
@@ -58,7 +58,6 @@ function showToast(message, type = 'success') {
     toast.className = `toast ${type}`;
     toast.textContent = message;
     container.appendChild(toast);
-
     requestAnimationFrame(() => toast.classList.add('show'));
     setTimeout(() => {
         toast.classList.remove('show');
@@ -93,48 +92,150 @@ if (hamburger && nav) {
     });
 }
 
-const categoryLabels = {
-    general: 'Discussion',
-    vacances: 'Vacances',
-    conseils: 'Conseils',
-    entraide: 'Entraide'
-};
+function getStatusElement() {
+    return document.getElementById('forumStatus');
+}
 
-const MAX_POST_PHOTOS = 20;
-let selectedPostImages = [];
-let currentFilter = 'all';
+function getTopicsElement() {
+    return document.getElementById('forumTopics');
+}
+
+function getForumCountElement() {
+    return document.getElementById('forumCount');
+}
+
+function updateStatus(message, state = 'connected') {
+    const statusEl = getStatusElement();
+    if (!statusEl) return;
+
+    statusEl.innerHTML = `<div class="forum-status-dot ${state}"></div><span>${message}</span>`;
+}
 
 function formatDate(timestamp) {
-    if (!timestamp) return '';
+    if (!timestamp) return "A l'instant";
+
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const diff = Date.now() - date;
+    if (Number.isNaN(date.getTime())) return "A l'instant";
+
+    const diff = Date.now() - date.getTime();
     if (diff < 60000) return "A l'instant";
     if (diff < 3600000) return `il y a ${Math.floor(diff / 60000)} min`;
     if (diff < 86400000) return `il y a ${Math.floor(diff / 3600000)}h`;
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    return date.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
 }
 
-function sanitize(str) {
+function sanitize(value) {
     const div = document.createElement('div');
-    div.textContent = str;
+    div.textContent = String(value || '');
     return div.innerHTML;
 }
 
-function formatPostContent(str) {
-    return sanitize(str).replace(/\n/g, '<br>');
+function formatPostContent(value) {
+    return sanitize(value).replace(/\n/g, '<br>');
 }
 
-async function uploadPostImage(dataUrl, index) {
-    if (!storageReady || !storage) return dataUrl;
-    const path = `forum-posts/${Date.now()}-${Math.random().toString(36).slice(2)}-${index}.jpg`;
-    const ref = storage.ref().child(path);
-    const snap = await ref.putString(dataUrl, 'data_url');
-    return snap.ref.getDownloadURL();
+function normalizeTopic(topic, fallbackId = '') {
+    return {
+        id: topic.id || fallbackId || `topic_${Date.now()}`,
+        author: String(topic.author || 'Anonyme').trim(),
+        title: String(topic.title || 'Sans titre').trim(),
+        content: String(topic.content || '').trim(),
+        category: String(topic.category || 'general').trim(),
+        createdAt: topic.createdAt || new Date().toISOString(),
+        media: Array.isArray(topic.media) ? topic.media.filter(Boolean) : []
+    };
 }
 
-function isStorageCorsError(err) {
-    const msg = (err && (err.message || err.code || '')).toString().toLowerCase();
-    return msg.includes('cors') || msg.includes('failed to fetch') || msg.includes('network-request-failed');
+function renderTopic(topic) {
+    const mediaHtml = topic.media.length ? `
+        <div class="forum-topic-media">
+            ${topic.media.map((src, index) => `<img src="${sanitize(src)}" alt="Photo du post ${index + 1}">`).join('')}
+        </div>
+    ` : '';
+
+    return `
+        <div class="forum-topic" data-category="${sanitize(topic.category)}" data-id="${sanitize(topic.id)}">
+            <div class="forum-topic-header">
+                <span class="forum-topic-title">${sanitize(topic.title)}</span>
+                <span class="forum-topic-badge badge-${sanitize(topic.category)}">${sanitize(categoryLabels[topic.category] || topic.category)}</span>
+            </div>
+            <div class="forum-topic-meta">Par <strong>${sanitize(topic.author)}</strong> - ${sanitize(formatDate(topic.createdAt))}</div>
+            <div class="forum-topic-content">${formatPostContent(topic.content)}</div>
+            ${mediaHtml}
+        </div>
+    `;
+}
+
+function renderTopics(topics) {
+    const topicsEl = getTopicsElement();
+    const countEl = getForumCountElement();
+    if (!topicsEl || !countEl) return;
+
+    const visibleTopics = topics.filter((topic) => currentFilter === 'all' || topic.category === currentFilter);
+
+    if (!visibleTopics.length) {
+        topicsEl.innerHTML = '<div class="forum-empty"><div class="forum-empty-icon">...</div><p>Aucun sujet pour le moment. Soyez le premier a publier.</p></div>';
+        countEl.textContent = '0 sujet';
+        return;
+    }
+
+    topicsEl.innerHTML = visibleTopics.map((topic) => renderTopic(topic)).join('');
+    countEl.textContent = `${visibleTopics.length} sujet${visibleTopics.length > 1 ? 's' : ''}`;
+}
+
+function getLocalTopics() {
+    try {
+        return JSON.parse(localStorage.getItem('vlv_topics') || '[]').map((topic) => normalizeTopic(topic));
+    } catch {
+        return [];
+    }
+}
+
+function saveLocalTopics(topics) {
+    localStorage.setItem('vlv_topics', JSON.stringify(topics));
+}
+
+function getDemoTopics() {
+    return [
+        normalizeTopic({
+            id: 'demo1',
+            author: 'Equipe VLV',
+            title: 'Bienvenue sur le forum',
+            content: 'Partagez vos idees, vos retours et vos propositions pour faire vivre le collectif.',
+            category: 'annonces',
+            createdAt: new Date(Date.now() - 86400000).toISOString(),
+            media: []
+        }),
+        normalizeTopic({
+            id: 'demo2',
+            author: 'Fatou',
+            title: 'Idee sortie famille',
+            content: 'On pourrait organiser une sortie au parc avec un atelier jeux cooperatifs pendant les vacances.',
+            category: 'idees',
+            createdAt: new Date(Date.now() - 172800000).toISOString(),
+            media: []
+        })
+    ];
+}
+
+function loadLocalTopics() {
+    let topics = getLocalTopics();
+    if (!topics.length) {
+        topics = getDemoTopics();
+        saveLocalTopics(topics);
+    }
+
+    renderTopics(topics);
+}
+
+function fallbackToLocalStorage(message) {
+    updateStatus(message || 'Mode local actif sur cet appareil.', 'error');
+    loadLocalTopics();
 }
 
 function renderPhotoPreview() {
@@ -148,7 +249,7 @@ function renderPhotoPreview() {
 
     preview.innerHTML = selectedPostImages.map((src, index) => `
         <div class="photo-thumb">
-            <img src="${src}" alt="Photo a publier ${index + 1}">
+            <img src="${sanitize(src)}" alt="Photo a publier ${index + 1}">
             <button type="button" class="remove-photo-btn" data-remove-index="${index}" aria-label="Supprimer la photo">x</button>
         </div>
     `).join('');
@@ -162,18 +263,30 @@ function compressImage(file) {
             img.onload = () => {
                 const maxW = 1280;
                 const maxH = 1280;
-                let w = img.width;
-                let h = img.height;
-                const ratio = Math.min(maxW / w, maxH / h, 1);
-                w = Math.round(w * ratio);
-                h = Math.round(h * ratio);
+                let width = img.width;
+                let height = img.height;
+                const ratio = Math.min(maxW / width, maxH / height, 1);
+
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
 
                 const canvas = document.createElement('canvas');
-                canvas.width = w;
-                canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-                resolve(canvas.toDataURL('image/jpeg', 0.76));
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d', { alpha: false });
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+
+                let quality = 0.8;
+                let out = canvas.toDataURL('image/jpeg', quality);
+                while (out.length > MAX_PHOTO_BYTES && quality > 0.45) {
+                    quality -= 0.08;
+                    out = canvas.toDataURL('image/jpeg', quality);
+                }
+
+                resolve(out);
             };
             img.onerror = reject;
             img.src = reader.result;
@@ -183,103 +296,54 @@ function compressImage(file) {
     });
 }
 
-function renderTopic(topic, id) {
-    const media = Array.isArray(topic.media) ? topic.media : [];
-    const mediaHtml = media.length
-        ? `<div class="forum-topic-media">${media.map((src, i) => `<img src="${src}" alt="Photo du post ${i + 1}">`).join('')}</div>`
-        : '';
+async function uploadPostImage(dataUrl, index) {
+    if (!storageReady || !storage) return dataUrl;
 
-    return `
-        <div class="forum-topic" data-category="${topic.category}" data-id="${id}">
-            <div class="forum-topic-header">
-                <span class="forum-topic-title">${sanitize(topic.title)}</span>
-                <span class="forum-topic-badge badge-${topic.category}">${categoryLabels[topic.category] || topic.category}</span>
-            </div>
-            <div class="forum-topic-meta">Par <strong>${sanitize(topic.author)}</strong> — ${formatDate(topic.createdAt)}</div>
-            <div class="forum-topic-content">${formatPostContent(topic.content)}</div>
-            ${mediaHtml}
-        </div>
-    `;
+    const path = `forum-posts/${Date.now()}-${Math.random().toString(36).slice(2)}-${index}.jpg`;
+    const ref = storage.ref().child(path);
+    const snap = await ref.putString(dataUrl, 'data_url');
+    return snap.ref.getDownloadURL();
+}
+
+function isStorageCorsError(error) {
+    const msg = (error && (error.message || error.code || '')).toString().toLowerCase();
+    return msg.includes('cors') || msg.includes('failed to fetch') || msg.includes('network-request-failed');
+}
+
+function toggleNewTopicForm() {
+    const form = document.getElementById('forumForm');
+    const btn = document.getElementById('toggleFormBtn');
+    if (!form || !btn) return;
+
+    form.classList.toggle('open');
+    btn.classList.toggle('open');
 }
 
 function applyFilter() {
-    const topics = document.querySelectorAll('.forum-topic');
-    let count = 0;
+    const topics = Array.from(document.querySelectorAll('.forum-topic'));
+    let visibleCount = 0;
 
-    topics.forEach((t) => {
-        const show = currentFilter === 'all' || t.dataset.category === currentFilter;
-        t.style.display = show ? '' : 'none';
-        if (show) count += 1;
+    topics.forEach((topic) => {
+        const show = currentFilter === 'all' || topic.dataset.category === currentFilter;
+        topic.style.display = show ? '' : 'none';
+        if (show) visibleCount += 1;
     });
 
-    const countEl = document.getElementById('forumCount');
-    if (countEl) countEl.textContent = `${count} sujet${count > 1 ? 's' : ''}`;
-}
-
-function getLocalTopics() {
-    try {
-        return JSON.parse(localStorage.getItem('vlv_topics') || '[]');
-    } catch {
-        return [];
+    const countEl = getForumCountElement();
+    if (countEl) {
+        countEl.textContent = `${visibleCount} sujet${visibleCount > 1 ? 's' : ''}`;
     }
 }
 
-function saveLocalTopics(topics) {
-    localStorage.setItem('vlv_topics', JSON.stringify(topics));
-}
-
-function loadLocalTopics() {
-    let topics = getLocalTopics();
-    if (topics.length === 0) {
-        topics = [
-            { id: 'demo1', author: 'Sophie', title: 'Premier sejour a la mer !', content: 'Mon fils a vu la mer pour la premiere fois grace a VLV. Il etait tellement heureux !', category: 'vacances', createdAt: new Date(Date.now() - 86400000).toISOString(), media: [] },
-            { id: 'demo2', author: 'Fatima', title: 'Conseils pour preparer les valises', content: "C'est notre premier depart. Qu'est-ce que vous conseillez de mettre dans les valises ?", category: 'conseils', createdAt: new Date(Date.now() - 172800000).toISOString(), media: [] }
-        ];
-        saveLocalTopics(topics);
-    }
-
-    const topicsEl = document.getElementById('forumTopics');
-    if (!topicsEl) return;
-    topicsEl.innerHTML = topics.map((t) => renderTopic(t, t.id)).join('');
-    applyFilter();
-}
-
-function fallbackToLocalStorage() {
-    const statusEl = document.getElementById('forumStatus');
-    if (statusEl) {
-        statusEl.innerHTML = '<div class="forum-status-dot error"></div><span>Mode local (sans API)</span>';
-    }
-    loadLocalTopics();
-}
-
-function initFirebaseForum() {
-    const statusEl = document.getElementById('forumStatus');
-    const topicsEl = document.getElementById('forumTopics');
-    if (!statusEl || !topicsEl || !db) return;
-
-    db.collection('topics').orderBy('createdAt', 'desc').onSnapshot(
-        (snapshot) => {
-            statusEl.innerHTML = '<div class="forum-status-dot connected"></div><span>Forum connecte en temps reel</span>';
-            if (snapshot.empty) {
-                topicsEl.innerHTML = '<div class="forum-empty"><div class="forum-empty-icon">...</div><p>Aucun sujet pour le moment.</p></div>';
-                const countEl = document.getElementById('forumCount');
-                if (countEl) countEl.textContent = '0 sujet';
-                return;
-            }
-
-            let html = '';
-            snapshot.forEach((doc) => {
-                html += renderTopic(doc.data(), doc.id);
-            });
-            topicsEl.innerHTML = html;
+function bindFilters() {
+    document.querySelectorAll('.filter-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach((button) => button.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter || 'all';
             applyFilter();
-        },
-        (error) => {
-            console.error('Erreur Firestore:', error);
-            statusEl.innerHTML = '<div class="forum-status-dot error"></div><span>Erreur Firebase, bascule locale</span>';
-            fallbackToLocalStorage();
-        }
-    );
+        });
+    });
 }
 
 function initPostComposer() {
@@ -294,17 +358,17 @@ function initPostComposer() {
             emojiPanel.hidden = !emojiPanel.hidden;
         });
 
-        emojiPanel.addEventListener('click', (e) => {
-            const btn = e.target.closest('.emoji-btn');
-            if (!btn) return;
-            content.value += btn.dataset.emoji || '';
+        emojiPanel.addEventListener('click', (event) => {
+            const button = event.target.closest('.emoji-btn');
+            if (!button) return;
+            content.value += button.dataset.emoji || '';
             content.focus();
         });
     }
 
     if (photosInput) {
-        photosInput.addEventListener('change', async (e) => {
-            const files = Array.from(e.target.files || []).filter((f) => f.type.startsWith('image/'));
+        photosInput.addEventListener('change', async (event) => {
+            const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith('image/'));
             if (!files.length) return;
 
             const remaining = MAX_POST_PHOTOS - selectedPostImages.length;
@@ -316,7 +380,7 @@ function initPostComposer() {
 
             const toProcess = files.slice(0, remaining);
             try {
-                const compressed = await Promise.all(toProcess.map(compressImage));
+                const compressed = await Promise.all(toProcess.map((file) => compressImage(file)));
                 selectedPostImages = selectedPostImages.concat(compressed);
                 renderPhotoPreview();
                 if (files.length > remaining) {
@@ -325,46 +389,163 @@ function initPostComposer() {
             } catch {
                 showToast('Impossible de traiter une photo', 'error');
             }
+
             photosInput.value = '';
         });
     }
 
     if (preview) {
-        preview.addEventListener('click', (e) => {
-            const btn = e.target.closest('[data-remove-index]');
-            if (!btn) return;
-            const index = parseInt(btn.dataset.removeIndex, 10);
+        preview.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-remove-index]');
+            if (!button) return;
+
+            const index = parseInt(button.dataset.removeIndex, 10);
             if (Number.isNaN(index)) return;
+
             selectedPostImages.splice(index, 1);
             renderPhotoPreview();
         });
     }
 }
 
-function toggleNewTopicForm() {
-    const form = document.getElementById('forumForm');
-    const btn = document.getElementById('toggleFormBtn');
-    if (form) form.classList.toggle('open');
-    if (btn) btn.classList.toggle('open');
+async function fetchServerTopics() {
+    const response = await fetch(`${apiBaseUrl}/topics`, {
+        headers: { Accept: 'application/json' },
+        cache: 'no-store'
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw new Error(payload && payload.message ? payload.message : 'Impossible de charger le forum public.');
+    }
+
+    return Array.isArray(payload) ? payload.map((topic) => normalizeTopic(topic)) : [];
 }
 
-function initFilters() {
-    document.querySelectorAll('.filter-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFilter = btn.dataset.filter;
-            applyFilter();
-        });
+async function createServerTopic(topic) {
+    const response = await fetch(`${apiBaseUrl}/topics`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+        },
+        body: JSON.stringify(topic)
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw new Error(payload && payload.message ? payload.message : 'Publication impossible pour le moment.');
+    }
+
+    return normalizeTopic(payload);
+}
+
+async function initServerForum() {
+    updateStatus('Connexion au forum public...', 'connected');
+    const topics = await fetchServerTopics();
+    renderTopics(topics);
+    updateStatus('Forum public en ligne', 'connected');
+
+    if (forumRefreshTimer) {
+        window.clearInterval(forumRefreshTimer);
+    }
+
+    forumRefreshTimer = window.setInterval(async () => {
+        try {
+            const refreshedTopics = await fetchServerTopics();
+            renderTopics(refreshedTopics);
+        } catch (error) {
+            console.warn('Rafraichissement du forum impossible:', error);
+        }
+    }, 20000);
+}
+
+function initFirebaseForum() {
+    db.collection('topics').orderBy('createdAt', 'desc').onSnapshot(
+        (snapshot) => {
+            const topics = snapshot.docs.map((doc) => normalizeTopic({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt && doc.data().createdAt.toDate
+                    ? doc.data().createdAt.toDate().toISOString()
+                    : doc.data().createdAt
+            }, doc.id));
+            renderTopics(topics);
+            updateStatus('Forum connecte en temps reel', 'connected');
+        },
+        (error) => {
+            console.error('Erreur Firestore:', error);
+            fallbackToLocalStorage('Connexion Firebase indisponible. Mode local actif.');
+        }
+    );
+}
+
+async function publishFirebaseTopic(author, title, content, category) {
+    let media = selectedPostImages.slice();
+
+    if (selectedPostImages.length && storageReady) {
+        const uploaded = await Promise.allSettled(
+            selectedPostImages.map((src, idx) => uploadPostImage(src, idx))
+        );
+
+        const okUrls = uploaded
+            .filter((result) => result.status === 'fulfilled')
+            .map((result) => result.value);
+
+        const failed = uploaded.filter((result) => result.status === 'rejected');
+
+        if (failed.length && !okUrls.length) {
+            const corsLike = failed.some((result) => isStorageCorsError(result.reason));
+            media = [];
+            showToast(
+                corsLike
+                    ? 'Photos non envoyees. Sujet publie sans photo.'
+                    : 'Photos non envoyees. Sujet publie sans photo.',
+                'info'
+            );
+        } else if (failed.length && okUrls.length) {
+            media = okUrls;
+            showToast('Certaines photos ont echoue. Sujet publie avec les photos valides.', 'info');
+        } else {
+            media = okUrls;
+        }
+    }
+
+    await db.collection('topics').add({
+        author,
+        title,
+        content,
+        category,
+        media,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 }
 
-function initSubmit() {
+async function publishLocalTopic(author, title, content, category, accessCode) {
+    if (POST_CREATION_CODE && accessCode !== POST_CREATION_CODE) {
+        throw new Error('Code incorrect: publication refusee');
+    }
+
+    const topics = getLocalTopics();
+    topics.unshift(normalizeTopic({
+        id: `topic_${Date.now()}`,
+        author,
+        title,
+        content,
+        category,
+        media: selectedPostImages.slice(),
+        createdAt: new Date().toISOString()
+    }));
+    saveLocalTopics(topics);
+    renderTopics(topics);
+}
+
+function bindSubmit() {
     const form = document.getElementById('forumForm');
     if (!form) return;
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
         const author = document.getElementById('authorName').value.trim();
         const accessCode = document.getElementById('postAccessCode').value.trim();
@@ -372,15 +553,8 @@ function initSubmit() {
         const content = document.getElementById('topicContent').value.trim();
         const category = document.getElementById('topicCategory').value;
 
-        if (!author || !title || !content) return;
-
-        if (!POST_CREATION_CODE || POST_CREATION_CODE === 'CHANGE_ME') {
-            showToast('Code de publication non configure.', 'error');
-            return;
-        }
-
-        if (accessCode !== POST_CREATION_CODE) {
-            showToast('Code incorrect: publication refusee', 'error');
+        if (!author || !title || !content) {
+            showToast('Merci de remplir tous les champs obligatoires', 'error');
             return;
         }
 
@@ -393,65 +567,32 @@ function initSubmit() {
         if (btnLoader) btnLoader.style.display = 'inline-block';
 
         try {
-            if (firebaseReady) {
-                let media = selectedPostImages.slice();
-
-                if (selectedPostImages.length && storageReady) {
-                    const uploaded = await Promise.allSettled(
-                        selectedPostImages.map((src, idx) => uploadPostImage(src, idx))
-                    );
-
-                    const okUrls = uploaded.filter((r) => r.status === 'fulfilled').map((r) => r.value);
-                    const failed = uploaded.filter((r) => r.status === 'rejected');
-
-                    if (failed.length && !okUrls.length) {
-                        const corsLike = failed.some((r) => isStorageCorsError(r.reason));
-                        media = [];
-                        showToast(
-                            corsLike
-                                ? 'Photos non envoyees (CORS/regles). Sujet publie sans photo.'
-                                : 'Photos non envoyees. Sujet publie sans photo.',
-                            'info'
-                        );
-                    } else if (failed.length && okUrls.length) {
-                        media = okUrls;
-                        showToast('Certaines photos ont echoue. Sujet publie avec les photos valides.', 'info');
-                    } else {
-                        media = okUrls;
-                    }
-                }
-
-                await db.collection('topics').add({
+            if (wantsServerMode) {
+                await createServerTopic({
                     author,
                     title,
                     content,
                     category,
-                    media,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    accessCode,
+                    media: selectedPostImages.slice()
                 });
+                const topics = await fetchServerTopics();
+                renderTopics(topics);
+                updateStatus('Forum public en ligne', 'connected');
+            } else if (firebaseReady) {
+                await publishFirebaseTopic(author, title, content, category);
             } else {
-                const topics = getLocalTopics();
-                topics.unshift({
-                    id: `topic_${Date.now()}`,
-                    author,
-                    title,
-                    content,
-                    category,
-                    media: selectedPostImages.slice(),
-                    createdAt: new Date().toISOString()
-                });
-                saveLocalTopics(topics);
-                loadLocalTopics();
+                await publishLocalTopic(author, title, content, category, accessCode);
             }
 
             form.reset();
             selectedPostImages = [];
             renderPhotoPreview();
             toggleNewTopicForm();
-            showToast('Sujet publie avec succes !');
-        } catch (err) {
-            console.error(err);
-            showToast('Erreur lors de la publication', 'error');
+            showToast('Sujet publie avec succes');
+        } catch (error) {
+            console.error(error);
+            showToast(error.message || 'Erreur lors de la publication', 'error');
         } finally {
             if (btn) btn.disabled = false;
             if (btnText) btnText.textContent = 'Publier le sujet';
@@ -460,14 +601,30 @@ function initSubmit() {
     });
 }
 
-initPostComposer();
-initFilters();
-initSubmit();
+async function initForum() {
+    bindFilters();
+    initPostComposer();
+    bindSubmit();
+    renderPhotoPreview();
 
-if (firebaseReady) {
-    initFirebaseForum();
-} else {
-    fallbackToLocalStorage();
+    if (wantsServerMode) {
+        try {
+            await initServerForum();
+            return;
+        } catch (error) {
+            console.error('Forum public indisponible:', error);
+            fallbackToLocalStorage('Serveur forum indisponible. Mode local actif.');
+            return;
+        }
+    }
+
+    if (firebaseReady) {
+        initFirebaseForum();
+        return;
+    }
+
+    fallbackToLocalStorage('Mode local actif sur cet appareil.');
 }
 
+initForum();
 window.toggleNewTopicForm = toggleNewTopicForm;
