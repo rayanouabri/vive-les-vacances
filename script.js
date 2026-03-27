@@ -136,46 +136,46 @@ if (statsSection) {
 }
 
 // Contact form
-const contactForm = document.getElementById(''contactForm'');
+const contactForm = document.getElementById('contactForm');
 if (contactForm) {
-    contactForm.addEventListener(''submit'', async (e) => {
+    contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const payload = {
-            firstName: (document.getElementById(''contactFirstName'') || {}).value || '''',
-            lastName: (document.getElementById(''contactLastName'') || {}).value || '''',
-            email: (document.getElementById(''contactEmail'') || {}).value || '''',
-            topic: (document.getElementById(''contactTopic'') || {}).value || '''',
-            message: (document.getElementById(''contactMessage'') || {}).value || '''',
-            website: (document.getElementById(''contactWebsite'') || {}).value || ''''
+            firstName: (document.getElementById('contactFirstName') || {}).value || '',
+            lastName: (document.getElementById('contactLastName') || {}).value || '',
+            email: (document.getElementById('contactEmail') || {}).value || '',
+            topic: (document.getElementById('contactTopic') || {}).value || '',
+            message: (document.getElementById('contactMessage') || {}).value || '',
+            website: (document.getElementById('contactWebsite') || {}).value || ''
         };
 
-        const submitBtn = contactForm.querySelector(''button[type="submit"]'');
-        const originalLabel = submitBtn ? submitBtn.textContent : '''';
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        const originalLabel = submitBtn ? submitBtn.textContent : '';
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.textContent = ''Envoi...'';
+            submitBtn.textContent = 'Envoi...';
         }
 
         try {
-            const response = await fetch(''https://vive-les-vacances.fr/wp-json/vlv-forum/v1/contact'', {
-                method: ''POST'',
+            const response = await fetch('https://vive-les-vacances.fr/wp-json/vlv-forum/v1/contact', {
+                method: 'POST',
                 headers: {
-                    ''Content-Type'': ''application/json'',
-                    Accept: ''application/json''
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
                 },
                 body: JSON.stringify(payload)
             });
 
             const data = await response.json().catch(() => ({}));
             if (!response.ok) {
-                throw new Error(data.message || ''Impossible d envoyer le message pour le moment.'');
+                throw new Error(data.message || 'Impossible d envoyer le message pour le moment.');
             }
 
-            alert(''Merci pour votre message ! Nous vous repondrons rapidement.'');
+            alert('Merci pour votre message ! Nous vous repondrons rapidement.');
             contactForm.reset();
         } catch (error) {
-            alert(error.message || ''Erreur lors de l envoi du message.'');
+            alert(error.message || 'Erreur lors de l envoi du message.');
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
