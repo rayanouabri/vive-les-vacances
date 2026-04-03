@@ -55,18 +55,38 @@ scrollBtn.addEventListener('click', () => {
 const hamburger = document.getElementById('hamburger');
 const nav = document.getElementById('nav');
 
+function openMenu() {
+    hamburger.classList.add('active');
+    nav.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    hamburger.setAttribute('aria-expanded', 'true');
+}
+
+function closeMenu() {
+    hamburger.classList.remove('active');
+    nav.classList.remove('open');
+    document.body.style.overflow = '';
+    hamburger.setAttribute('aria-expanded', 'false');
+}
+
 hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('active');
-    nav.classList.toggle('open');
-    document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
+    if (nav.classList.contains('open')) {
+        closeMenu();
+    } else {
+        openMenu();
+    }
 });
 
-nav.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        nav.classList.remove('open');
-        document.body.style.overflow = '';
-    });
+// Fermer le menu en cliquant sur un lien
+nav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', closeMenu);
+});
+
+// Fermer le menu avec la touche Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && nav.classList.contains('open')) {
+        closeMenu();
+    }
 });
 
 // Active nav on scroll

@@ -1343,94 +1343,213 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 @media (max-width: 768px) {
+    /* ---- HAMBURGER ---- */
     .hamburger { display: flex; }
 
+    /* ---- NAV MOBILE OVERLAY ---- */
     .nav {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(255,255,255,0.98);
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 8px;
-        opacity: 0; visibility: hidden;
-        transition: all 0.3s;
-        z-index: 999;
+        gap: 6px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.35s ease, visibility 0.35s ease;
+        z-index: 998;
     }
-    .nav.open { opacity: 1; visibility: visible; }
-    .nav-link { font-size: 1.1rem; padding: 14px 24px; }
+    .nav.open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
 
+    /* Animation d'entrée des liens */
+    .nav .nav-link {
+        font-size: 1.2rem;
+        padding: 14px 32px;
+        width: 80vw;
+        max-width: 320px;
+        text-align: center;
+        border-radius: 14px;
+        font-weight: 600;
+        color: #333;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: background 0.2s, color 0.2s, transform 0.35s ease, opacity 0.35s ease;
+    }
+    .nav.open .nav-link:nth-child(1) { transform: translateY(0); opacity: 1; transition-delay: 0.05s; }
+    .nav.open .nav-link:nth-child(2) { transform: translateY(0); opacity: 1; transition-delay: 0.10s; }
+    .nav.open .nav-link:nth-child(3) { transform: translateY(0); opacity: 1; transition-delay: 0.15s; }
+    .nav.open .nav-link:nth-child(4) { transform: translateY(0); opacity: 1; transition-delay: 0.20s; }
+    .nav.open .nav-link:nth-child(5) { transform: translateY(0); opacity: 1; transition-delay: 0.25s; }
+    .nav .nav-link:hover, .nav .nav-link.active { background: #eef4ff; color: #1e62c9; }
+
+    /* Bouton "Faire un don" affiché DANS le menu mobile */
+    .nav .nav-mobile-donate {
+        display: inline-flex;
+        margin-top: 16px;
+        padding: 14px 32px;
+        background: #ff4f4f;
+        color: #fff;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(255,79,79,0.3);
+        transform: translateY(20px);
+        opacity: 0;
+        transition: background 0.2s, transform 0.35s ease, opacity 0.35s ease;
+        transition-delay: 0s;
+    }
+    .nav.open .nav-mobile-donate {
+        transform: translateY(0);
+        opacity: 1;
+        transition-delay: 0.30s;
+    }
+    .nav .nav-mobile-donate:hover { background: #e64444; }
+
+    /* Cache le bouton don du header sur mobile */
     .header-btn { display: none; }
 
+    /* ---- HERO ---- */
     .hero { height: 85vh; min-height: 500px; }
-    .hero h1 { font-size: 2.6rem; }
-    .hero-subtitle { font-size: 1.05rem; }
+    .hero h1 { font-size: 2.4rem; letter-spacing: -1px; }
+    .hero-subtitle { font-size: 1rem; margin-bottom: 28px; }
     .hero-badge { font-size: 0.75rem; padding: 6px 18px; }
     .hero-scroll-hint { display: none; }
+    .hero-actions { gap: 12px; }
+    .hero-actions .btn-lg { padding: 14px 28px; font-size: 0.95rem; }
 
+    /* ---- SECTIONS ---- */
     .section { padding: 50px 0; }
     .section-title { font-size: 1.7rem; margin-bottom: 30px; }
 
+    /* ---- MISSION ---- */
     .mission-values { grid-template-columns: 1fr; gap: 16px; }
     .mission-text { font-size: 1rem; }
+    .section-mission { padding: 70px 0 40px; }
 
-    .stats-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+    /* ---- STATS ---- */
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
     .stat-number { font-size: 2.4rem; }
-    .stat-card { padding: 28px 16px 24px; }
+    .stat-card { padding: 26px 14px 22px; }
+    .stat-label { font-size: 0.85rem; }
 
-    .centres-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+    /* ---- CENTRES ---- */
+    .centres-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
     .centres-subtitle { font-size: 0.95rem; }
 
+    /* ---- NOS ACTIONS ---- */
     .section-blue { padding-top: 70px; }
     .section-curve-top { height: 40px; }
     .floating-logo {
         width: 70px;
         height: auto;
         margin: -78px auto 10px;
-        padding: 0;
     }
-    .action-card { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
+    .action-card { grid-template-columns: 1fr; gap: 16px; padding: 20px; margin-bottom: 30px; }
     .action-reverse { direction: ltr; }
     .action-image img { height: 220px; }
     .action-text h3 { font-size: 1.25rem; }
 
+    /* ---- TESTIMONIAL ---- */
     .testimonial-inner {
         grid-template-columns: 1fr;
         text-align: center;
-        padding: 30px;
+        padding: 28px 24px;
+        gap: 24px;
     }
     .testimonial-photo { justify-self: center; }
-    .testimonial-content blockquote { padding-left: 0; border-left: none; text-align: center; }
+    .testimonial-photo img { width: 130px; height: 130px; }
+    .testimonial-content blockquote {
+        padding-left: 0;
+        border-left: none;
+        text-align: center;
+        font-size: 1.05rem;
+        border-top: 3px solid #1e62c9;
+        padding-top: 16px;
+    }
 
-    .contact-form { padding: 24px; }
+    /* ---- CONTACT ---- */
+    .contact-form { padding: 22px 18px; }
     .contact-grid { grid-template-columns: 1fr; gap: 30px; }
+    .contact-form input,
+    .contact-form select,
+    .contact-form textarea { padding: 14px 16px; font-size: 1rem; }
 
+    /* ---- CTA ---- */
     .cta-inner h2 { font-size: 1.3rem; }
+    .cta-banner { padding: 50px 0; }
 
+    /* ---- FOOTER ---- */
+    .footer { padding: 50px 0 0; }
+    .footer-columns { gap: 24px; }
     .footer-bottom {
         flex-direction: column;
         text-align: center;
+        gap: 12px;
     }
-    .footer-links { flex-wrap: wrap; justify-content: center; }
+    .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
 
+    /* ---- FORMULAIRES ---- */
     .form-row { grid-template-columns: 1fr !important; }
     .reply-form { flex-direction: column; }
     .reply-form input { flex: unset; }
 
+    /* ---- FORUM ---- */
     .forum-hero { padding: 110px 0 40px; }
     .forum-hero h1 { font-size: 1.8rem; }
     .emoji-panel { grid-template-columns: repeat(6, 1fr); }
     .forum-topic-media { grid-template-columns: 1fr; }
     .forum-topic-media img { height: 200px; }
+    .forum-new-topic { padding: 20px; }
 }
 
 @media (max-width: 480px) {
+    /* ---- HERO ---- */
+    .hero { height: 75vh; min-height: 480px; }
+    .hero h1 { font-size: 1.9rem; letter-spacing: -0.5px; }
+    .hero-subtitle { font-size: 0.9rem; }
+    .hero-actions { flex-direction: column; align-items: center; width: 100%; }
+    .hero-actions .btn { width: 85%; justify-content: center; }
+
+    /* ---- STATS ---- */
     .stats-grid { grid-template-columns: 1fr; }
-    .centres-grid { grid-template-columns: 1fr; }
-    .hero { height: 75vh; }
-    .hero h1 { font-size: 2.1rem; }
-    .hero-actions { flex-direction: column; align-items: center; }
-    .action-image img { height: 180px; }
     .stat-card { border-radius: 8px 8px 8px 24px; }
+
+    /* ---- CENTRES ---- */
+    .centres-grid { grid-template-columns: 1fr; }
+
+    /* ---- ACTIONS ---- */
+    .action-image img { height: 180px; }
+    .action-card { padding: 16px; }
+
+    /* ---- CONTAINER ---- */
+    .container { padding: 0 16px; }
+
+    /* ---- SECTION TITLE ---- */
+    .section-title { font-size: 1.5rem; }
+
+    /* ---- PARTENAIRES ---- */
+    .partenaires-img-large { border-radius: 10px; }
+
+    /* ---- CONTACT ---- */
+    .contact-form { padding: 18px 14px; }
+
+    /* ---- FOOTER ---- */
+    .footer-links { gap: 8px; }
+    .footer-links a { font-size: 0.82rem; }
+
+    /* ---- SCROLL TO TOP ---- */
+    #scrollToTopBtn { bottom: 20px; right: 16px; width: 44px; height: 44px; }
 }
