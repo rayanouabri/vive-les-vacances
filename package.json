@@ -1,0 +1,12 @@
+{
+  "name": "vive-les-vacances",
+  "version": "1.0.0",
+  "description": "Site associatif Vive Les Vacances ! - Forum et informations",
+  "scripts": {
+    "build": "echo 'Static site ready'",
+    "dev": "echo 'Serving static files'"
+  },
+  "keywords": ["association", "vacances", "enfants"],
+  "author": "VLV",
+  "license": "MIT"
+}
