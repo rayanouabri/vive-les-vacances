@@ -2,15 +2,19 @@ const forumConfig = window.VLV_FORUM_CONFIG || {};
 const forumMode = (forumConfig.mode || 'local').toLowerCase();
 const apiBaseUrl = (forumConfig.apiBaseUrl || '').replace(/\/$/, '');
 const firebaseConfig = forumConfig.firebase || {};
+const supabaseConfig = forumConfig.supabase || {};
 const POST_CREATION_CODE = (forumConfig.postCreationCode || '').trim();
 const wantsServerMode = forumMode === 'server' && Boolean(apiBaseUrl);
 const wantsFirebaseMode = forumMode === 'firebase';
+const wantsSupabaseMode = forumMode === 'supabase' && Boolean(supabaseConfig.projectUrl && supabaseConfig.anonKey);
 const allowStorageUploads = wantsFirebaseMode && forumConfig.storageUploads === true;
 
 let db = null;
 let firebaseReady = false;
 let storage = null;
 let storageReady = false;
+let supabase = null;
+let supabaseReady = false;
 let selectedPostImages = [];
 let currentFilter = 'all';
 let forumRefreshTimer = null;
@@ -48,6 +52,35 @@ try {
     }
 } catch (error) {
     console.warn('Initialisation Firebase impossible:', error.message);
+}
+
+try {
+    if (wantsSupabaseMode) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        script.onload = () => {
+            if (window.supabase && window.supabase.createClient) {
+                supabase = window.supabase.createClient(supabaseConfig.projectUrl, supabaseConfig.anonKey);
+                supabaseReady = true;
+                console.log('Supabase initialise avec succes');
+                if (typeof loadSupabaseTopics === 'function') {
+                    loadSupabaseTopics();
+                }
+            }
+        };
+        script.onerror = () => {
+            console.warn('Impossible de charger la bibliotheque Supabase');
+            if (forumConfig.fallbackToLocal) {
+                fallbackToLocalStorage('Mode local (Supabase non disponible)');
+            }
+        };
+        document.head.appendChild(script);
+    }
+} catch (error) {
+    console.warn('Initialisation Supabase impossible:', error.message);
+    if (forumConfig.fallbackToLocal) {
+        fallbackToLocalStorage('Mode local (erreur Supabase)');
+    }
 }
 
 function showToast(message, type = 'success') {
@@ -231,6 +264,68 @@ function loadLocalTopics() {
     }
 
     renderTopics(topics);
+}
+
+async function getSupabaseTopics() {
+    if (!supabase || !supabaseReady) return [];
+    try {
+        const { data, error } = await supabase
+            .from(supabaseConfig.tableName || 'forum_topics')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return (data || []).map(topic => normalizeTopic({
+            id: topic.id,
+            author: topic.author,
+            title: topic.title,
+            content: topic.content,
+            category: topic.category,
+            createdAt: topic.created_at,
+            media: topic.media || []
+        }));
+    } catch (error) {
+        console.warn('Erreur Supabase getTopics:', error.message);
+        return [];
+    }
+}
+
+async function saveSupabaseTopic(topic) {
+    if (!supabase || !supabaseReady) return false;
+    try {
+        const { error } = await supabase
+            .from(supabaseConfig.tableName || 'forum_topics')
+            .insert([{
+                id: topic.id,
+                author: topic.author,
+                title: topic.title,
+                content: topic.content,
+                category: topic.category,
+                media: topic.media || [],
+                created_at: new Date().toISOString()
+            }]);
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.warn('Erreur Supabase saveTopic:', error.message);
+        return false;
+    }
+}
+
+async function loadSupabaseTopics() {
+    if (!supabaseReady) {
+        loadLocalTopics();
+        return;
+    }
+    updateStatus('Chargement depuis Supabase...', 'connected');
+    const topics = await getSupabaseTopics();
+    if (topics.length > 0) {
+        renderTopics(topics);
+        updateStatus('Forum en ligne', 'connected');
+    } else {
+        const demoTopics = getDemoTopics();
+        renderTopics(demoTopics);
+        updateStatus('Forum en ligne (demo)', 'connected');
+    }
 }
 
 function fallbackToLocalStorage(message) {
@@ -521,6 +616,30 @@ async function publishFirebaseTopic(author, title, content, category) {
     });
 }
 
+async function publishSupabaseTopic(author, title, content, category, accessCode) {
+    if (POST_CREATION_CODE && accessCode !== POST_CREATION_CODE) {
+        throw new Error('Code incorrect: publication refusee');
+    }
+
+    const newTopic = normalizeTopic({
+        id: `topic_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+        author,
+        title,
+        content,
+        category,
+        media: selectedPostImages.slice(),
+        createdAt: new Date().toISOString()
+    });
+
+    const success = await saveSupabaseTopic(newTopic);
+    if (!success) {
+        throw new Error('Erreur lors de la publication. Veuillez reessayer.');
+    }
+
+    const topics = await getSupabaseTopics();
+    renderTopics(topics);
+}
+
 async function publishLocalTopic(author, title, content, category, accessCode) {
     if (POST_CREATION_CODE && accessCode !== POST_CREATION_CODE) {
         throw new Error('Code incorrect: publication refusee');
@@ -579,6 +698,9 @@ function bindSubmit() {
                 const topics = await fetchServerTopics();
                 renderTopics(topics);
                 updateStatus('Forum public en ligne', 'connected');
+            } else if (supabaseReady) {
+                await publishSupabaseTopic(author, title, content, category, accessCode);
+                updateStatus('Forum en ligne', 'connected');
             } else if (firebaseReady) {
                 await publishFirebaseTopic(author, title, content, category);
             } else {
@@ -614,6 +736,26 @@ async function initForum() {
         } catch (error) {
             console.error('Forum public indisponible:', error);
             fallbackToLocalStorage('Serveur forum indisponible. Mode local actif.');
+            return;
+        }
+    }
+
+    if (wantsSupabaseMode) {
+        updateStatus('Initialisation Supabase...', 'connected');
+        let waitCount = 0;
+        while (!supabaseReady && waitCount < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            waitCount++;
+        }
+        if (supabaseReady) {
+            await loadSupabaseTopics();
+            setInterval(async () => {
+                const topics = await getSupabaseTopics();
+                renderTopics(topics);
+            }, 30000);
+            return;
+        } else {
+            fallbackToLocalStorage('Supabase indisponible. Mode local actif.');
             return;
         }
     }

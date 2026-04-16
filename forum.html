@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -29,7 +29,6 @@
                 <a href="index.html#nous" class="nav-link">Nous Contacter</a>
                 <a href="evenements.html" class="nav-link">Événements</a>
                 <a href="forum.html" class="nav-link active">Forum Parents</a>
-                <a href="https://fr.ulule.com/vive-les-vacances-lille/" target="_blank" rel="noopener" class="nav-mobile-donate">❤️ Faire un don</a>
             </nav>
             <a href="https://fr.ulule.com/vive-les-vacances-lille/" target="_blank" rel="noopener" class="btn btn-donate header-btn">
                 Faire un don
@@ -171,12 +170,53 @@
         </div>
     </footer>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     <script src="forum-config.js"></script>
-    <script src="forum.js"></script>
+    <script>
+        (function bootstrapForum() {
+            function loadScript(src) {
+                return new Promise(function (resolve, reject) {
+                    const s = document.createElement('script');
+                    s.src = src;
+                    s.onload = resolve;
+                    s.onerror = reject;
+                    document.head.appendChild(s);
+                });
+            }
+
+            function loadForumRuntime() {
+                loadScript('forum.js').catch(function () {
+                    console.error('Impossible de charger forum.js');
+                });
+            }
+
+            function loadFirebaseSdkIfNeeded() {
+                const config = window.VLV_FORUM_CONFIG || {};
+                if ((config.mode || 'local').toLowerCase() !== 'firebase') {
+                    loadForumRuntime();
+                    return;
+                }
+
+                loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js')
+                    .then(function () {
+                        return loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js');
+                    })
+                    .then(function () {
+                        return loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js');
+                    })
+                    .then(loadForumRuntime)
+                    .catch(function () {
+                        console.warn('SDK Firebase indisponible, bascule locale.');
+                        loadForumRuntime();
+                    });
+            }
+
+            // Optional local override for private config. Missing file is ignored.
+            const localConfig = document.createElement('script');
+            localConfig.src = 'forum-config.local.js';
+            localConfig.onload = loadFirebaseSdkIfNeeded;
+            localConfig.onerror = loadFirebaseSdkIfNeeded;
+            document.head.appendChild(localConfig);
+        })();
+    </script>
 </body>
 </html>
-

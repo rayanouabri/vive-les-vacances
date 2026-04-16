@@ -17,7 +17,7 @@
     <header class="header" id="header">
         <div class="container header-inner">
             <a href="#accueil" class="logo">
-                <img src="images/logo.png?v=20260316c" alt="Logo Vive Les Vacances !" width="60" height="59">
+                <img src="images/logo.png?v=20260316b" alt="Logo Vive Les Vacances !" width="60" height="59">
             </a>
             <nav class="nav" id="nav">
                 <a href="#qui" class="nav-link">Qui Sommes-Nous ?</a>
@@ -25,7 +25,6 @@
                 <a href="#nous" class="nav-link">Nous Contacter</a>
                 <a href="evenements.html" class="nav-link">Événements</a>
                 <a href="forum.html" class="nav-link">Forum Parents</a>
-                <a href="https://fr.ulule.com/vive-les-vacances-lille/" target="_blank" rel="noopener" class="nav-mobile-donate">❤️ Faire un don</a>
             </nav>
             <a href="https://fr.ulule.com/vive-les-vacances-lille/" target="_blank" rel="noopener" class="btn btn-donate header-btn">
                 Faire un don
@@ -124,7 +123,7 @@
         <div class="section-curve-top"></div>
         <div class="container">
             <div class="actions-header">
-                <img src="images/logo.png?v=20260316c" alt="Logo VLV" class="floating-logo" width="100" height="98">
+                <img src="images/logo.png?v=20260316b" alt="Logo VLV" class="floating-logo" width="100" height="98">
                 <h2 class="section-title text-white">Nos Actions</h2>
             </div>
 
@@ -155,7 +154,7 @@
             <!-- Action 3 : Accompagnement à la scolarité -->
             <div class="action-card fade-in">
                 <div class="action-image">
-                    <img src="images/activite1.jpg?v=20260316c" alt="Accompagnement scolaire" loading="lazy">
+                    <img src="images/activite1.jpg?v=20260316b" alt="Accompagnement scolaire" loading="lazy">
                 </div>
                 <div class="action-text">
                     <h3>L'accompagnement à la scolarité</h3>
@@ -167,7 +166,7 @@
             <!-- Action 4 : Les Suivis -->
             <div class="action-card action-reverse fade-in">
                 <div class="action-image">
-                    <img src="images/sortie1.jpg?v=20260316c" alt="Les suivis - sorties du mercredi" loading="lazy">
+                    <img src="images/sortie1.jpg?v=20260316b" alt="Les suivis - sorties du mercredi" loading="lazy">
                 </div>
                 <div class="action-text">
                     <h3>Les Suivis</h3>
@@ -179,11 +178,11 @@
             <!-- Action 5 : Le WESKID -->
             <div class="action-card fade-in">
                 <div class="action-image">
-                    <img src="images/ski.jpeg?v=20260316c" alt="Le WESKID - séjour au ski" loading="lazy">
+                    <img src="images/ski.jpeg?v=20260316b" alt="Le WESKID - séjour au ski" loading="lazy">
                 </div>
                 <div class="action-text">
                     <h3>Le WESKID</h3>
-                    <p>Du 2 au 5 janvier 2025 au Centre Le Chorin à Plainfaing (Hautes-Vosges), en partenariat avec le Ski Club EDHEC. 32 enfants des centres sociaux partenaires de Roubaix et Villeneuve d'Ascq ont découvert les sports d'hiver : ski, patinage, luge et veillées montagnardes. En 2026, ce séjour sera ouvert aux centres sociaux de Lille.</p>
+                    <p>Du 2 au 5 janvier 2025 au Centre Le Chorin à Plainfaing (Hautes-Vosges), en partenariat avec le Ski Club EDHEC. 32 enfants des centres sociaux de Roubaix, Villeneuve d'Ascq et Lambersart ont découvert les sports d'hiver : ski, patinage, luge et veillées montagnardes. En 2026, ce séjour sera ouvert aux centres sociaux de Lille.</p>
                     <a href="evenements.html#weskid" class="btn btn-green btn-sm">En savoir plus</a>
                 </div>
             </div>
@@ -305,21 +304,22 @@
         <div class="container">
             <div class="footer-columns">
                 <div class="footer-col">
-                    <div class="footer-icon">&#128154;</div>
-                    <h4>Engagée pour les enfants des centres sociaux</h4>
+                        <input type="text" id="contactFirstName" name="firstName" placeholder="Prénom" required maxlength="100">
+                        <input type="text" id="contactLastName" name="lastName" placeholder="Nom" required maxlength="100">
                 </div>
-                <div class="footer-col">
-                    <div class="footer-icon">&#127775;</div>
+                    <input type="email" id="contactEmail" name="email" placeholder="Email" required maxlength="100">
+                    <select id="contactTopic" name="topic" required>
                     <h4>Impactant dans leur vie futur</h4>
                 </div>
                 <div class="footer-col">
                     <div class="footer-icon">&#129309;</div>
                     <h4>Inclusif auprès de chacun</h4>
                 </div>
-            </div>
+                    <textarea id="contactMessage" name="message" placeholder="Message" required maxlength="2000" rows="5"></textarea>
+                    <input type="text" id="contactWebsite" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" value="">
             <div class="footer-bottom">
                 <div class="footer-brand">
-                    <img src="images/logo.png?v=20260316c" alt="Logo VLV" width="40" height="39">
+                    <img src="images/logo.png?v=20260316b" alt="Logo VLV" width="40" height="39">
                     <span>Vive Les Vacances !</span>
                 </div>
                 <div class="footer-links">
@@ -340,11 +340,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
