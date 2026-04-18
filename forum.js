@@ -56,9 +56,9 @@ try {
 
 try {
     if (wantsSupabaseMode) {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-        script.onload = () => {
+        const existingSupabaseScript = document.querySelector('script[src*="supabase-js"]');
+
+        const initSupabase = () => {
             if (window.supabase && window.supabase.createClient) {
                 supabase = window.supabase.createClient(supabaseConfig.projectUrl, supabaseConfig.anonKey);
                 supabaseReady = true;
@@ -68,13 +68,26 @@ try {
                 }
             }
         };
-        script.onerror = () => {
-            console.warn('Impossible de charger la bibliotheque Supabase');
-            if (forumConfig.fallbackToLocal) {
-                fallbackToLocalStorage('Mode local (Supabase non disponible)');
+
+        if (existingSupabaseScript) {
+            if (window.supabase && window.supabase.createClient) {
+                initSupabase();
+            } else {
+                existingSupabaseScript.onload = initSupabase;
             }
-        };
-        document.head.appendChild(script);
+        } else {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.async = true;
+            script.onload = initSupabase;
+            script.onerror = () => {
+                console.warn('Impossible de charger la bibliotheque Supabase');
+                if (forumConfig.fallbackToLocal) {
+                    fallbackToLocalStorage('Mode local (Supabase non disponible)');
+                }
+            };
+            document.head.appendChild(script);
+        }
     }
 } catch (error) {
     console.warn('Initialisation Supabase impossible:', error.message);
