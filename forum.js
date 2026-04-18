@@ -13,7 +13,7 @@ let db = null;
 let firebaseReady = false;
 let storage = null;
 let storageReady = false;
-let supabase = null;
+let vlvSupabaseClient = null;
 let supabaseReady = false;
 let selectedPostImages = [];
 let currentFilter = 'all';
@@ -60,7 +60,7 @@ try {
 
         const initSupabase = () => {
             if (window.supabase && window.supabase.createClient) {
-                supabase = window.supabase.createClient(supabaseConfig.projectUrl, supabaseConfig.anonKey);
+                vlvSupabaseClient = window.supabase.createClient(supabaseConfig.projectUrl, supabaseConfig.anonKey);
                 supabaseReady = true;
                 console.log('Supabase initialise avec succes');
                 if (typeof loadSupabaseTopics === 'function') {
@@ -280,9 +280,9 @@ function loadLocalTopics() {
 }
 
 async function getSupabaseTopics() {
-    if (!supabase || !supabaseReady) return [];
+    if (!vlvSupabaseClient || !supabaseReady) return [];
     try {
-        const { data, error } = await supabase
+        const { data, error } = await vlvSupabaseClient
             .from(supabaseConfig.tableName || 'forum_topics')
             .select('*')
             .order('created_at', { ascending: false });
@@ -303,9 +303,9 @@ async function getSupabaseTopics() {
 }
 
 async function saveSupabaseTopic(topic) {
-    if (!supabase || !supabaseReady) return false;
+    if (!vlvSupabaseClient || !supabaseReady) return false;
     try {
-        const { error } = await supabase
+        const { error } = await vlvSupabaseClient
             .from(supabaseConfig.tableName || 'forum_topics')
             .insert([{
                 id: topic.id,

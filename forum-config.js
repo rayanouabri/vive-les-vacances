@@ -7,8 +7,8 @@ window.VLV_FORUM_CONFIG = {
 
     // Configuration Supabase
     supabase: {
-        projectUrl: "https://zqnahuwulelkutwxxklky.supabase.co",
-        anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc0xvY2FsIjpmYWxzZSwiZGlzcyI6IjY3NGlpN2pyXzB6bWlTQWQ1LW5YyJdfRkpXZlZTIXRm1yN1ZpG1npxt",
+        projectUrl: "https://rdharosbdconzljxmwyr.supabase.co",
+        anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkaGFyb3NiZGNvbnpsanhtd3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNDczMTYsImV4cCI6MjA5MTkyMzMxNn0.FpgQuPYc_YujH40oAo2bNOXHZjzobAEKYnMVfODYhfk",
         tableName: "forum_topics"
     },
 
