@@ -18,6 +18,8 @@ let supabaseReady = false;
 let selectedPostImages = [];
 let currentFilter = 'all';
 let forumRefreshTimer = null;
+let currentTopics = [];
+let editingTopicId = null;
 
 const MAX_POST_PHOTOS = 10;
 const MAX_PHOTO_BYTES = 1200000;
@@ -204,6 +206,13 @@ function renderTopic(topic) {
         </div>
     ` : '';
 
+    const actionsHtml = supabaseReady ? `
+        <div class="forum-topic-actions">
+            <button type="button" class="topic-action-btn" data-action="edit" data-id="${sanitize(topic.id)}">Modifier</button>
+            <button type="button" class="topic-action-btn topic-action-danger" data-action="delete" data-id="${sanitize(topic.id)}">Supprimer</button>
+        </div>
+    ` : '';
+
     return `
         <div class="forum-topic" data-category="${sanitize(topic.category)}" data-id="${sanitize(topic.id)}">
             <div class="forum-topic-header">
@@ -213,16 +222,18 @@ function renderTopic(topic) {
             <div class="forum-topic-meta">Par <strong>${sanitize(topic.author)}</strong> - ${sanitize(formatDate(topic.createdAt))}</div>
             <div class="forum-topic-content">${formatPostContent(topic.content)}</div>
             ${mediaHtml}
+            ${actionsHtml}
         </div>
     `;
 }
 
 function renderTopics(topics) {
+    currentTopics = Array.isArray(topics) ? topics : [];
     const topicsEl = getTopicsElement();
     const countEl = getForumCountElement();
     if (!topicsEl || !countEl) return;
 
-    const visibleTopics = topics.filter((topic) => currentFilter === 'all' || topic.category === currentFilter);
+    const visibleTopics = currentTopics.filter((topic) => currentFilter === 'all' || topic.category === currentFilter);
 
     if (!visibleTopics.length) {
         topicsEl.innerHTML = '<div class="forum-empty"><div class="forum-empty-icon">...</div><p>Aucun sujet pour le moment. Soyez le premier a publier.</p></div>';
@@ -674,6 +685,128 @@ async function publishLocalTopic(author, title, content, category, accessCode) {
     renderTopics(topics);
 }
 
+function exitEditMode() {
+    editingTopicId = null;
+    selectedPostImages = [];
+    renderPhotoPreview();
+    const form = document.getElementById('forumForm');
+    if (form) form.reset();
+    const header = document.querySelector('.forum-new-topic-header h3');
+    if (header) header.innerHTML = '&#9997; Creer un nouveau sujet';
+    const btnText = document.querySelector('#forumForm .btn-text');
+    if (btnText) btnText.textContent = 'Publier le sujet';
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    const authorInput = document.getElementById('authorName');
+    if (authorInput) authorInput.disabled = false;
+}
+
+function enterEditMode(topic) {
+    editingTopicId = topic.id;
+    document.getElementById('authorName').value = topic.author;
+    document.getElementById('authorName').disabled = true;
+    document.getElementById('topicTitle').value = topic.title;
+    document.getElementById('topicContent').value = topic.content;
+    document.getElementById('topicCategory').value = topic.category;
+    document.getElementById('postAccessCode').value = '';
+    selectedPostImages = Array.isArray(topic.media) ? topic.media.slice() : [];
+    renderPhotoPreview();
+
+    const header = document.querySelector('.forum-new-topic-header h3');
+    if (header) header.innerHTML = '&#9998; Modifier le sujet';
+    const btnText = document.querySelector('#forumForm .btn-text');
+    if (btnText) btnText.textContent = 'Enregistrer les modifications';
+
+    let cancelBtn = document.getElementById('cancelEditBtn');
+    if (!cancelBtn) {
+        const submitBtn = document.querySelector('#forumForm button[type="submit"]');
+        if (submitBtn && submitBtn.parentNode) {
+            cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.id = 'cancelEditBtn';
+            cancelBtn.className = 'btn btn-secondary';
+            cancelBtn.style.marginLeft = '0.5rem';
+            cancelBtn.textContent = 'Annuler';
+            cancelBtn.addEventListener('click', () => {
+                exitEditMode();
+                toggleNewTopicForm();
+            });
+            submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+        }
+    } else {
+        cancelBtn.style.display = '';
+    }
+
+    const form = document.getElementById('forumForm');
+    if (form && !form.classList.contains('open')) toggleNewTopicForm();
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function updateSupabaseTopic(id, title, content, category, media, accessCode) {
+    const { error } = await vlvSupabaseClient.rpc('update_forum_topic', {
+        p_code: accessCode,
+        p_id: id,
+        p_title: title,
+        p_content: content,
+        p_category: category,
+        p_media: media || []
+    });
+    if (error) {
+        const msg = (error.message || '').toLowerCase();
+        if (msg.includes('invalid_access_code')) throw new Error("Code d'acces incorrect.");
+        if (msg.includes('topic_not_found')) throw new Error('Sujet introuvable.');
+        throw new Error('Erreur lors de la modification.');
+    }
+}
+
+async function deleteSupabaseTopic(id, accessCode) {
+    const { error } = await vlvSupabaseClient.rpc('delete_forum_topic', {
+        p_code: accessCode,
+        p_id: id
+    });
+    if (error) {
+        const msg = (error.message || '').toLowerCase();
+        if (msg.includes('invalid_access_code')) throw new Error("Code d'acces incorrect.");
+        throw new Error('Erreur lors de la suppression.');
+    }
+}
+
+function bindTopicActions() {
+    const topicsEl = getTopicsElement();
+    if (!topicsEl) return;
+
+    topicsEl.addEventListener('click', async (event) => {
+        const btn = event.target.closest('[data-action]');
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        const topic = currentTopics.find((t) => t.id === id);
+        if (!topic) return;
+
+        if (action === 'edit') {
+            enterEditMode(topic);
+            return;
+        }
+
+        if (action === 'delete') {
+            const accessCode = window.prompt("Entrez le code d'acces pour supprimer ce sujet:");
+            if (!accessCode) return;
+            btn.disabled = true;
+            try {
+                await deleteSupabaseTopic(id, accessCode);
+                const topics = await getSupabaseTopics();
+                renderTopics(topics);
+                showToast('Sujet supprime');
+            } catch (error) {
+                showToast(error.message || 'Suppression impossible', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    });
+}
+
 function bindSubmit() {
     const form = document.getElementById('forumForm');
     if (!form) return;
@@ -695,13 +828,21 @@ function bindSubmit() {
         const btn = form.querySelector('button[type="submit"]');
         const btnText = btn ? btn.querySelector('.btn-text') : null;
         const btnLoader = btn ? btn.querySelector('.btn-loader') : null;
+        const isEditing = Boolean(editingTopicId);
 
         if (btn) btn.disabled = true;
-        if (btnText) btnText.textContent = 'Publication...';
+        if (btnText) btnText.textContent = isEditing ? 'Modification...' : 'Publication...';
         if (btnLoader) btnLoader.style.display = 'inline-block';
 
         try {
-            if (wantsServerMode) {
+            if (isEditing && supabaseReady) {
+                await updateSupabaseTopic(editingTopicId, title, content, category, selectedPostImages.slice(), accessCode);
+                const topics = await getSupabaseTopics();
+                renderTopics(topics);
+                showToast('Sujet modifie avec succes');
+                exitEditMode();
+                toggleNewTopicForm();
+            } else if (wantsServerMode) {
                 await createServerTopic({
                     author,
                     title,
@@ -713,26 +854,40 @@ function bindSubmit() {
                 const topics = await fetchServerTopics();
                 renderTopics(topics);
                 updateStatus('Forum public en ligne', 'connected');
+                form.reset();
+                selectedPostImages = [];
+                renderPhotoPreview();
+                toggleNewTopicForm();
+                showToast('Sujet publie avec succes');
             } else if (supabaseReady) {
                 await publishSupabaseTopic(author, title, content, category, accessCode);
                 updateStatus('Forum en ligne', 'connected');
+                form.reset();
+                selectedPostImages = [];
+                renderPhotoPreview();
+                toggleNewTopicForm();
+                showToast('Sujet publie avec succes');
             } else if (firebaseReady) {
                 await publishFirebaseTopic(author, title, content, category);
+                form.reset();
+                selectedPostImages = [];
+                renderPhotoPreview();
+                toggleNewTopicForm();
+                showToast('Sujet publie avec succes');
             } else {
                 await publishLocalTopic(author, title, content, category, accessCode);
+                form.reset();
+                selectedPostImages = [];
+                renderPhotoPreview();
+                toggleNewTopicForm();
+                showToast('Sujet publie avec succes');
             }
-
-            form.reset();
-            selectedPostImages = [];
-            renderPhotoPreview();
-            toggleNewTopicForm();
-            showToast('Sujet publie avec succes');
         } catch (error) {
             console.error(error);
             showToast(error.message || 'Erreur lors de la publication', 'error');
         } finally {
             if (btn) btn.disabled = false;
-            if (btnText) btnText.textContent = 'Publier le sujet';
+            if (btnText) btnText.textContent = editingTopicId ? 'Enregistrer les modifications' : 'Publier le sujet';
             if (btnLoader) btnLoader.style.display = 'none';
         }
     });
@@ -742,6 +897,7 @@ async function initForum() {
     bindFilters();
     initPostComposer();
     bindSubmit();
+    bindTopicActions();
     renderPhotoPreview();
 
     if (wantsServerMode) {

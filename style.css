@@ -1222,6 +1222,47 @@ img { max-width: 100%; height: auto; display: block; }
     border: 1px solid #edf1f5;
 }
 
+.forum-topic-actions {
+    margin-top: 14px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.topic-action-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid #dfe6ec;
+    background: #f7f9fb;
+    color: #444;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.topic-action-btn:hover {
+    background: #eef3f7;
+    border-color: #c8d3dc;
+}
+
+.topic-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.topic-action-btn.topic-action-danger {
+    color: #c0392b;
+    border-color: #f3cec9;
+    background: #fcf4f2;
+}
+
+.topic-action-btn.topic-action-danger:hover {
+    background: #fae7e4;
+    border-color: #e7b5ad;
+}
+
 /* Replies */
 .forum-replies {
     margin-top: 16px;
