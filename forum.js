@@ -270,12 +270,7 @@ function getDemoTopics() {
 }
 
 function loadLocalTopics() {
-    let topics = getLocalTopics();
-    if (!topics.length) {
-        topics = getDemoTopics();
-        saveLocalTopics(topics);
-    }
-
+    const topics = getLocalTopics();
     renderTopics(topics);
 }
 
@@ -331,14 +326,8 @@ async function loadSupabaseTopics() {
     }
     updateStatus('Chargement depuis Supabase...', 'connected');
     const topics = await getSupabaseTopics();
-    if (topics.length > 0) {
-        renderTopics(topics);
-        updateStatus('Forum en ligne', 'connected');
-    } else {
-        const demoTopics = getDemoTopics();
-        renderTopics(demoTopics);
-        updateStatus('Forum en ligne (demo)', 'connected');
-    }
+    renderTopics(topics);
+    updateStatus('Forum en ligne', 'connected');
 }
 
 function fallbackToLocalStorage(message) {
