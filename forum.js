@@ -58,44 +58,49 @@ try {
 
 try {
     if (wantsSupabaseMode) {
-        const existingSupabaseScript = document.querySelector('script[src*="supabase-js"]');
-
         const initSupabase = () => {
+            if (supabaseReady) return true;
             if (window.supabase && window.supabase.createClient) {
                 vlvSupabaseClient = window.supabase.createClient(supabaseConfig.projectUrl, supabaseConfig.anonKey);
                 supabaseReady = true;
                 console.log('Supabase initialise avec succes');
-                if (typeof loadSupabaseTopics === 'function') {
-                    loadSupabaseTopics();
-                }
+                if (typeof loadSupabaseTopics === 'function') loadSupabaseTopics();
+                return true;
             }
+            return false;
         };
 
-        if (existingSupabaseScript) {
-            if (window.supabase && window.supabase.createClient) {
-                initSupabase();
-            } else {
-                existingSupabaseScript.onload = initSupabase;
+        const cdnSources = [
+            'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+            'https://unpkg.com/@supabase/supabase-js@2',
+            'https://esm.sh/@supabase/supabase-js@2?bundle'
+        ];
+
+        const tryLoad = (index) => {
+            if (initSupabase()) return;
+            if (index >= cdnSources.length) {
+                console.warn('Tous les CDN Supabase ont echoue');
+                if (forumConfig.fallbackToLocal) fallbackToLocalStorage('Mode local (Supabase non disponible)');
+                return;
             }
-        } else {
             const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.src = cdnSources[index];
             script.async = true;
-            script.onload = initSupabase;
-            script.onerror = () => {
-                console.warn('Impossible de charger la bibliotheque Supabase');
-                if (forumConfig.fallbackToLocal) {
-                    fallbackToLocalStorage('Mode local (Supabase non disponible)');
-                }
-            };
+            script.onload = () => { if (!initSupabase()) tryLoad(index + 1); };
+            script.onerror = () => { console.warn('CDN echec:', cdnSources[index]); tryLoad(index + 1); };
             document.head.appendChild(script);
+        };
+
+        const existingSupabaseScript = document.querySelector('script[src*="supabase-js"]');
+        if (existingSupabaseScript) {
+            if (!initSupabase()) existingSupabaseScript.addEventListener('load', () => { if (!initSupabase()) tryLoad(0); });
+        } else {
+            tryLoad(0);
         }
     }
 } catch (error) {
     console.warn('Initialisation Supabase impossible:', error.message);
-    if (forumConfig.fallbackToLocal) {
-        fallbackToLocalStorage('Mode local (erreur Supabase)');
-    }
+    if (forumConfig.fallbackToLocal) fallbackToLocalStorage('Mode local (erreur Supabase)');
 }
 
 function showToast(message, type = 'success') {
@@ -258,6 +263,23 @@ function renderTopics(topics) {
     countEl.textContent = `${visibleTopics.length} sujet${visibleTopics.length > 1 ? 's' : ''}`;
 }
 
+function purgeStaleLocalTopics() {
+    try {
+        const raw = localStorage.getItem('vlv_topics');
+        if (!raw) return;
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) { localStorage.removeItem('vlv_topics'); return; }
+        const cleaned = arr.filter((t) => t && t.id !== 'demo1' && t.id !== 'demo2' && !(typeof t.id === 'string' && t.id.startsWith('demo')));
+        if (cleaned.length !== arr.length) {
+            if (cleaned.length === 0) localStorage.removeItem('vlv_topics');
+            else localStorage.setItem('vlv_topics', JSON.stringify(cleaned));
+        }
+    } catch {
+        localStorage.removeItem('vlv_topics');
+    }
+}
+purgeStaleLocalTopics();
+
 function getLocalTopics() {
     try {
         return JSON.parse(localStorage.getItem('vlv_topics') || '[]').map((topic) => normalizeTopic(topic));
@@ -268,29 +290,6 @@ function getLocalTopics() {
 
 function saveLocalTopics(topics) {
     localStorage.setItem('vlv_topics', JSON.stringify(topics));
-}
-
-function getDemoTopics() {
-    return [
-        normalizeTopic({
-            id: 'demo1',
-            author: 'Equipe VLV',
-            title: 'Bienvenue sur le forum',
-            content: 'Partagez vos idees, vos retours et vos propositions pour faire vivre le collectif.',
-            category: 'annonces',
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-            media: []
-        }),
-        normalizeTopic({
-            id: 'demo2',
-            author: 'Fatou',
-            title: 'Idee sortie famille',
-            content: 'On pourrait organiser une sortie au parc avec un atelier jeux cooperatifs pendant les vacances.',
-            category: 'idees',
-            createdAt: new Date(Date.now() - 172800000).toISOString(),
-            media: []
-        })
-    ];
 }
 
 function loadLocalTopics() {
