@@ -12,7 +12,7 @@ window.VLV_FORUM_CONFIG = {
         tableName: "forum_topics"
     },
 
-    // Code optionnel pour valider les publications
+    // Code obligatoire pour valider les publications (verifie cote serveur)
     postCreationCode: "",
 
     // Pour fallback localStorage en cas d'erreur

@@ -619,8 +619,8 @@ async function publishFirebaseTopic(author, title, content, category) {
 }
 
 async function publishSupabaseTopic(author, title, content, category, accessCode) {
-    if (POST_CREATION_CODE && accessCode !== POST_CREATION_CODE) {
-        throw new Error('Code incorrect: publication refusee');
+    if (!accessCode) {
+        throw new Error("Code d'acces requis pour publier.");
     }
 
     const newTopic = normalizeTopic({
@@ -633,8 +633,21 @@ async function publishSupabaseTopic(author, title, content, category, accessCode
         createdAt: new Date().toISOString()
     });
 
-    const success = await saveSupabaseTopic(newTopic);
-    if (!success) {
+    const { error } = await vlvSupabaseClient.rpc('publish_forum_topic', {
+        p_code: accessCode,
+        p_id: newTopic.id,
+        p_author: newTopic.author,
+        p_title: newTopic.title,
+        p_content: newTopic.content,
+        p_category: newTopic.category,
+        p_media: newTopic.media || []
+    });
+
+    if (error) {
+        const msg = (error.message || '').toLowerCase();
+        if (msg.includes('invalid_access_code')) {
+            throw new Error("Code d'acces incorrect. Publication refusee.");
+        }
         throw new Error('Erreur lors de la publication. Veuillez reessayer.');
     }
 
