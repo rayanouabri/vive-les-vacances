@@ -19,7 +19,7 @@ let selectedPostImages = [];
 let currentFilter = 'all';
 let forumRefreshTimer = null;
 
-const MAX_POST_PHOTOS = 4;
+const MAX_POST_PHOTOS = 10;
 const MAX_PHOTO_BYTES = 1200000;
 const categoryLabels = {
     general: 'Discussion',
