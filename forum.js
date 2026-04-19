@@ -125,18 +125,31 @@ if (scrollBtn) {
 }
 
 if (hamburger && nav) {
+    const closeForumMenu = () => {
+        hamburger.classList.remove('active');
+        nav.classList.remove('open');
+        document.body.classList.remove('nav-open');
+    };
+
     hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        nav.classList.toggle('open');
-        document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
+        const willOpen = !nav.classList.contains('open');
+        hamburger.classList.toggle('active', willOpen);
+        nav.classList.toggle('open', willOpen);
+        document.body.classList.toggle('nav-open', willOpen);
     });
 
     nav.querySelectorAll('.nav-link').forEach((link) => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            nav.classList.remove('open');
-            document.body.style.overflow = '';
-        });
+        link.addEventListener('click', closeForumMenu);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!nav.classList.contains('open')) return;
+        if (nav.contains(e.target) || hamburger.contains(e.target)) return;
+        closeForumMenu();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && nav.classList.contains('open')) closeForumMenu();
     });
 }
 

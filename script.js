@@ -58,14 +58,14 @@ const nav = document.getElementById('nav');
 function openMenu() {
     hamburger.classList.add('active');
     nav.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('nav-open');
     hamburger.setAttribute('aria-expanded', 'true');
 }
 
 function closeMenu() {
     hamburger.classList.remove('active');
     nav.classList.remove('open');
-    document.body.style.overflow = '';
+    document.body.classList.remove('nav-open');
     hamburger.setAttribute('aria-expanded', 'false');
 }
 
@@ -75,6 +75,12 @@ hamburger.addEventListener('click', () => {
     } else {
         openMenu();
     }
+});
+
+document.addEventListener('click', (e) => {
+    if (!nav.classList.contains('open')) return;
+    if (nav.contains(e.target) || hamburger.contains(e.target)) return;
+    closeMenu();
 });
 
 // Fermer le menu en cliquant sur un lien
