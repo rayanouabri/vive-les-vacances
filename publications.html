@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publications - Vive Les Vacances !</title>
+    <meta name="description" content="Retrouvez toutes les publications partagees par les parents de l'association Vive Les Vacances !">
+    <link rel="icon" href="images/favicon.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .pub-hero { padding: 120px 0 60px; background: linear-gradient(135deg, #1e62c9 0%, #3a7bd5 100%); color: #fff; text-align: center; }
+        .pub-hero h1 { font-size: 2.6rem; margin-bottom: 14px; letter-spacing: -1px; }
+        .pub-hero p { font-size: 1.05rem; opacity: 0.9; max-width: 640px; margin: 0 auto; }
+        .pub-feed { max-width: 760px; margin: 0 auto; padding: 60px 20px 80px; }
+        .pub-status { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: #f5f9ff; border-radius: 12px; margin-bottom: 24px; font-size: 0.9rem; color: #1e62c9; border: 1px solid #d7e6ff; }
+        .pub-status-dot { width: 9px; height: 9px; border-radius: 50%; background: #2ecc71; animation: pulse 2s infinite; }
+        .pub-status.error .pub-status-dot { background: #e74c3c; }
+        .pub-status.loading .pub-status-dot { background: #f39c12; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .pub-card { background: #fff; border-radius: 18px; padding: 26px 28px; margin-bottom: 18px; box-shadow: 0 3px 14px rgba(10,22,40,0.06); border: 1px solid #eef2f7; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .pub-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(10,22,40,0.1); }
+        .pub-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+        .pub-category { display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 50px; background: #eef4ff; color: #1e62c9; }
+        .pub-category.vacances { background: #e8f5e9; color: #2e7d32; }
+        .pub-category.conseils { background: #fff3e0; color: #e65100; }
+        .pub-category.entraide { background: #fce4ec; color: #c2185b; }
+        .pub-title { font-size: 1.25rem; font-weight: 700; color: #1a2a44; margin: 4px 0 10px; line-height: 1.35; }
+        .pub-meta { font-size: 0.85rem; color: #6b7a8f; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .pub-author { font-weight: 600; color: #1e62c9; }
+        .pub-content { color: #334155; line-height: 1.65; font-size: 0.98rem; white-space: pre-wrap; word-break: break-word; }
+        .pub-media { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 16px; }
+        .pub-media img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; cursor: zoom-in; transition: transform 0.25s ease; }
+        .pub-media img:hover { transform: scale(1.02); }
+        .pub-empty { text-align: center; padding: 60px 20px; color: #6b7a8f; }
+        .pub-empty-icon { font-size: 3rem; margin-bottom: 14px; opacity: 0.5; }
+        .pub-cta { text-align: center; margin-top: 30px; padding-top: 30px; border-top: 1px solid #e5ebf3; }
+        .pub-cta a { color: #1e62c9; font-weight: 600; text-decoration: underline; }
+        .pub-skeleton { background: #f5f9ff; border-radius: 18px; height: 140px; margin-bottom: 18px; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .pub-lightbox { position: fixed; inset: 0; background: rgba(10,22,40,0.92); display: none; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; padding: 20px; }
+        .pub-lightbox.open { display: flex; }
+        .pub-lightbox img { max-width: 100%; max-height: 90vh; border-radius: 12px; }
+        @media (max-width: 640px) {
+            .pub-hero { padding: 100px 0 40px; }
+            .pub-hero h1 { font-size: 2rem; }
+            .pub-feed { padding: 40px 16px 60px; }
+            .pub-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header header-solid" id="header">
+        <div class="container header-inner">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="Logo Vive Les Vacances !" width="60" height="59">
+            </a>
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="index.html#qui" class="nav-link">Qui Sommes-Nous ?</a>
+                <a href="index.html#nos" class="nav-link">Nos Actions</a>
+                <a href="index.html#nous" class="nav-link">Nous Contacter</a>
+                <a href="evenements.html" class="nav-link">Événements</a>
+                <a href="publications.html" class="nav-link active">Publications</a>
+            </nav>
+            <a href="https://fr.ulule.com/vive-les-vacances-lille/" target="_blank" rel="noopener" class="btn btn-donate header-btn">
+                Faire un don
+            </a>
+            <button class="hamburger" id="hamburger" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="pub-hero">
+        <div class="container">
+            <h1>Publications de la communaute</h1>
+            <p>Retrouvez les retours, photos et messages partages par les parents et l'equipe de Vive Les Vacances !</p>
+        </div>
+    </section>
+
+    <!-- FEED -->
+    <main class="pub-feed">
+        <div class="pub-status loading" id="pubStatus">
+            <span class="pub-status-dot"></span>
+            <span id="pubStatusText">Chargement des publications...</span>
+        </div>
+
+        <div id="pubList">
+            <div class="pub-skeleton"></div>
+            <div class="pub-skeleton"></div>
+            <div class="pub-skeleton"></div>
+        </div>
+
+        <div class="pub-cta">
+            <p>Vous souhaitez partager votre experience ?</p>
+            <p><a href="forum.html">Participez au forum communautaire</a></p>
+        </div>
+    </main>
+
+    <div class="pub-lightbox" id="pubLightbox"><img id="pubLightboxImg" alt=""></div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <div class="footer-brand">
+                    <img src="images/logo.png" alt="Logo VLV" width="40" height="39">
+                    <span>Vive Les Vacances !</span>
+                </div>
+                <div class="footer-links">
+                    <a href="index.html">Accueil</a>
+                    <a href="index.html#qui">Qui Sommes-Nous</a>
+                    <a href="index.html#nos">Nos Actions</a>
+                    <a href="evenements.html">Événements</a>
+                    <a href="publications.html">Publications</a>
+                    <a href="forum.html">Forum</a>
+                </div>
+                <p class="footer-copy">&copy; 2026 Vive Les Vacances ! &mdash; Association lilloise depuis 1993</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    (function () {
+        const SUPABASE_URL = 'https://rdharosbdconzljxmwyr.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkaGFyb3NiZGNvbnpsanhtd3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNDczMTYsImV4cCI6MjA5MTkyMzMxNn0.FpgQuPYc_YujH40oAo2bNOXHZjzobAEKYnMVfODYhfk';
+
+        const categoryLabels = {
+            general: 'Discussion',
+            vacances: 'Vacances',
+            conseils: 'Conseils',
+            entraide: 'Entraide',
+            annonces: 'Annonces',
+            idees: 'Idees'
+        };
+
+        function sanitize(str) {
+            const div = document.createElement('div');
+            div.textContent = str == null ? '' : String(str);
+            return div.innerHTML;
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            if (isNaN(d)) return '';
+            const now = new Date();
+            const diff = (now - d) / 1000;
+            if (diff < 60) return "A l'instant";
+            if (diff < 3600) return `Il y a ${Math.floor(diff / 60)} min`;
+            if (diff < 86400) return `Il y a ${Math.floor(diff / 3600)} h`;
+            if (diff < 604800) return `Il y a ${Math.floor(diff / 86400)} j`;
+            return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function setStatus(text, kind) {
+            const status = document.getElementById('pubStatus');
+            const statusText = document.getElementById('pubStatusText');
+            status.classList.remove('error', 'loading');
+            if (kind) status.classList.add(kind);
+            statusText.textContent = text;
+        }
+
+        function renderPosts(posts) {
+            const listEl = document.getElementById('pubList');
+            if (!posts.length) {
+                listEl.innerHTML = `
+                    <div class="pub-empty">
+                        <div class="pub-empty-icon">&#128172;</div>
+                        <h3>Aucune publication pour le moment</h3>
+                        <p>Soyez le premier a partager une experience sur le forum.</p>
+                    </div>`;
+                return;
+            }
+            listEl.innerHTML = posts.map((p) => {
+                const category = (p.category || 'general').toLowerCase();
+                const catLabel = categoryLabels[category] || category;
+                const media = Array.isArray(p.media) ? p.media.filter(Boolean) : [];
+                const mediaHtml = media.length ? `
+                    <div class="pub-media">
+                        ${media.map((src) => `<img src="${sanitize(src)}" alt="Photo" loading="lazy" data-full="${sanitize(src)}">`).join('')}
+                    </div>` : '';
+                return `
+                    <article class="pub-card">
+                        <div class="pub-card-head">
+                            <div>
+                                <span class="pub-category ${sanitize(category)}">${sanitize(catLabel)}</span>
+                                <h2 class="pub-title">${sanitize(p.title || 'Sans titre')}</h2>
+                                <div class="pub-meta">
+                                    <span>Par <span class="pub-author">${sanitize(p.author || 'Anonyme')}</span></span>
+                                    <span>&bull;</span>
+                                    <span>${sanitize(formatDate(p.created_at))}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pub-content">${sanitize(p.content || '')}</div>
+                        ${mediaHtml}
+                    </article>`;
+            }).join('');
+
+            listEl.querySelectorAll('.pub-media img').forEach((img) => {
+                img.addEventListener('click', () => {
+                    const lb = document.getElementById('pubLightbox');
+                    const lbImg = document.getElementById('pubLightboxImg');
+                    lbImg.src = img.dataset.full;
+                    lb.classList.add('open');
+                });
+            });
+        }
+
+        document.getElementById('pubLightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'pubLightbox') e.currentTarget.classList.remove('open');
+        });
+
+        async function loadPosts() {
+            setStatus('Chargement des publications...', 'loading');
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/forum_topics?select=*&order=created_at.desc`, {
+                    headers: {
+                        apikey: SUPABASE_KEY,
+                        Authorization: `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                renderPosts(data);
+                setStatus(`${data.length} publication${data.length > 1 ? 's' : ''} en ligne`);
+            } catch (err) {
+                console.error(err);
+                setStatus('Connexion impossible. Verifiez votre reseau.', 'error');
+                document.getElementById('pubList').innerHTML = `
+                    <div class="pub-empty">
+                        <div class="pub-empty-icon">&#128268;</div>
+                        <h3>Publications indisponibles</h3>
+                        <p>Reessayez dans quelques instants ou visitez le <a href="forum.html">forum</a>.</p>
+                    </div>`;
+            }
+        }
+
+        loadPosts();
+        setInterval(loadPosts, 30000);
+
+        // Menu mobile
+        const hamburger = document.getElementById('hamburger');
+        const nav = document.getElementById('nav');
+        if (hamburger && nav) {
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                nav.classList.toggle('open');
+                document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
+            });
+            nav.querySelectorAll('.nav-link').forEach((link) => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    nav.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+            });
+        }
+    })();
+    </script>
+</body>
+</html>
