@@ -15,10 +15,6 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* ===== KEYFRAMES ===== */
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes scrollBounce {
-    0%, 100% { transform: translateY(0); opacity: 0.6; }
-    50% { transform: translateY(8px); opacity: 1; }
-}
 
 .container {
     max-width: 1140px;
@@ -54,11 +50,11 @@ img { max-width: 100%; height: auto; display: block; }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(32,132,219,0.4); }
 
 .btn-donate {
-    background: #ff4f4f;
+    background: #D1507B;
     color: #fff;
-    box-shadow: 0 4px 15px rgba(255,79,79,0.3);
+    box-shadow: 0 4px 15px rgba(209,80,123,0.3);
 }
-.btn-donate:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,79,79,0.4); background: #e64444; }
+.btn-donate:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(209,80,123,0.4); background: #b8406a; }
 
 .btn-white {
     background: #fff;
@@ -244,22 +240,8 @@ img { max-width: 100%; height: auto; display: block; }
     flex-wrap: wrap;
 }
 
-.hero-scroll-hint {
-    margin-top: 50px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    opacity: 0.6;
-}
-.hero-scroll-hint span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; }
-.scroll-arrow {
-    width: 20px; height: 20px;
-    border-right: 2px solid #fff;
-    border-bottom: 2px solid #fff;
-    transform: rotate(45deg);
-    animation: scrollBounce 2s ease-in-out infinite;
-}
+.hero-scroll-hint { display: none; }
+.scroll-arrow { display: none; }
 
 /* ===== SECTIONS ===== */
 .section { padding: 80px 0; }
@@ -750,10 +732,11 @@ img { max-width: 100%; height: auto; display: block; }
 /* ===== ANIMATIONS ===== */
 .fade-in {
     opacity: 0;
-    transform: translateY(25px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    will-change: opacity, transform;
 }
-.fade-in.visible { opacity: 1; transform: translateY(0); }
+.fade-in.visible { opacity: 1; transform: translateY(0); will-change: auto; }
 
 /* ===== ACTIONS HERO (page Nos Actions) ===== */
 .actions-hero {
@@ -1488,7 +1471,7 @@ img { max-width: 100%; height: auto; display: block; }
         justify-content: center;
         margin: 18px 0 0;
         padding: 15px 24px;
-        background: linear-gradient(135deg, #ff5959 0%, #ff3d3d 100%);
+        background: linear-gradient(135deg, #D1507B 0%, #b8406a 100%);
         color: #fff;
         border-radius: 14px;
         font-weight: 700;
@@ -1506,7 +1489,7 @@ img { max-width: 100%; height: auto; display: block; }
         opacity: 1;
         transition-delay: 0.38s;
     }
-    .nav .nav-mobile-donate:hover { box-shadow: 0 10px 26px rgba(255, 79, 79, 0.5); }
+    .nav .nav-mobile-donate:hover { box-shadow: 0 10px 26px rgba(209, 80, 123, 0.5); }
 
     /* Cache le bouton don du header sur mobile */
     .header-btn { display: none; }

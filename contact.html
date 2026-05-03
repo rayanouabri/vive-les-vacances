@@ -19,8 +19,8 @@
         .contact-info-card { background: #f5f9ff; border: 1px solid #d7e6ff; border-radius: 16px; padding: 24px 20px; text-align: center; }
         .contact-info-card .ci-icon { font-size: 2rem; margin-bottom: 10px; }
         .contact-info-card h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #1e62c9; font-weight: 700; margin-bottom: 6px; }
-        .contact-info-card p { font-size: 0.95rem; color: #334155; font-weight: 500; }
-        .contact-info-card a { color: #1e62c9; text-decoration: none; }
+        .contact-info-card p { font-size: 0.95rem; color: #334155; font-weight: 500; word-break: break-all; overflow-wrap: anywhere; }
+        .contact-info-card a { color: #1e62c9; text-decoration: none; word-break: break-all; }
         .contact-info-card a:hover { text-decoration: underline; }
         .contact-form-card { background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 4px 24px rgba(10,22,40,0.08); border: 1px solid #eef2f7; }
         .contact-form-card h2 { font-size: 1.4rem; color: #1a2a44; margin-bottom: 24px; }
@@ -87,7 +87,7 @@
             <div class="contact-info-card">
                 <div class="ci-icon">&#128140;</div>
                 <h4>Email</h4>
-                <p><a href="mailto:vive.les.vacances.asso@gmail.com">vive.les.vacances.asso@gmail.com</a></p>
+                <p><a href="mailto:contact@vive-les-vacances.org">contact@vive-les-vacances.org</a></p>
             </div>
             <div class="contact-info-card">
                 <div class="ci-icon">&#127968;</div>
@@ -115,7 +115,6 @@
                     <option value="Evenement VLV">Evenement VLV</option>
                     <option value="Subvention et defiscalisation">Subvention et défiscalisation</option>
                     <option value="Partenariat">Partenariat divers</option>
-                    <option value="Benevole">Devenir bénévole</option>
                     <option value="Autre">Autre</option>
                 </select>
                 <textarea id="cpMessage" placeholder="Votre message *" required maxlength="2000"></textarea>
@@ -124,7 +123,7 @@
             </form>
             <div class="contact-success" id="contactSuccess">
                 <h3>&#10003; Message envoyé !</h3>
-                <p>Votre messagerie s'est ouverte. Si rien ne s'est passé, écrivez-nous directement à <a href="mailto:vive.les.vacances.asso@gmail.com">vive.les.vacances.asso@gmail.com</a></p>
+                <p>Votre messagerie s'est ouverte. Si rien ne s'est passé, écrivez-nous directement à <a href="mailto:contact@vive-les-vacances.org">contact@vive-les-vacances.org</a></p>
             </div>
         </div>
     </div>
@@ -179,7 +178,7 @@
     (function () {
         const form = document.getElementById('contactPageForm');
         const success = document.getElementById('contactSuccess');
-        const CONTACT_EMAIL = 'vive.les.vacances.asso@gmail.com';
+        const CONTACT_EMAIL = 'contact@vive-les-vacances.org';
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();
