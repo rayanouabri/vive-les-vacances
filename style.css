@@ -1372,21 +1372,16 @@ img { max-width: 100%; height: auto; display: block; }
     /* ---- HAMBURGER ---- */
     .hamburger { display: flex; }
 
-    /* ---- BACKDROP FLOU via pseudo-element sur le nav ---- */
+    /* ---- OVERLAY BACKDROP ---- */
     .nav::after {
         content: "";
         position: fixed;
-        top: 0;
-        left: -100vw;
-        width: 100vw;
-        height: 100vh;
+        inset: 0;
         background: rgba(10, 22, 40, 0.45);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease;
-        z-index: -1;
+        z-index: 998;
     }
     .nav.open::after { opacity: 1; pointer-events: auto; }
 
@@ -1394,102 +1389,84 @@ img { max-width: 100%; height: auto; display: block; }
     .nav {
         position: fixed;
         top: 0; right: 0; bottom: 0;
-        width: 86vw;
-        max-width: 360px;
-        background: linear-gradient(165deg, #ffffff 0%, #f5f9ff 100%);
-        box-shadow: -8px 0 40px rgba(10, 22, 40, 0.18);
+        width: 100%;
+        max-width: 300px;
+        background: #fff;
+        box-shadow: -4px 0 32px rgba(10, 22, 40, 0.15);
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
-        gap: 4px;
-        padding: 90px 22px 32px;
+        gap: 0;
+        padding: 82px 20px 32px;
         transform: translateX(100%);
-        opacity: 1;
-        visibility: visible;
         pointer-events: none;
-        transition: transform 0.4s cubic-bezier(0.65,0,0.35,1);
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 999;
         overflow-y: auto;
+        border-left: 1px solid #e8eef6;
     }
     .nav.open {
         transform: translateX(0);
         pointer-events: auto;
     }
-    .nav::before {
-        content: "Menu";
-        position: absolute;
-        top: 28px;
-        left: 28px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: #1e62c9;
-        opacity: 0.6;
-    }
+    .nav::before { display: none; }
 
-    /* Animation d'entrée des liens */
+    /* ---- LIENS ---- */
     .nav .nav-link {
-        font-size: 1.05rem;
-        padding: 15px 18px;
-        width: 100%;
-        text-align: left;
-        border-radius: 14px;
-        font-weight: 600;
-        color: #1a2a44;
-        transform: translateX(30px);
-        opacity: 0;
-        transition: background 0.2s, color 0.2s, transform 0.4s ease, opacity 0.4s ease;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        padding: 16px 14px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #1a2a44;
+        border-radius: 10px;
+        transform: none;
+        opacity: 1;
+        transition: background 0.15s, color 0.15s;
+        border-bottom: 1px solid #f0f4fa;
     }
+    .nav .nav-link:last-of-type { border-bottom: none; }
     .nav .nav-link::after {
         content: "›";
         font-size: 1.4rem;
+        line-height: 1;
         color: #1e62c9;
-        opacity: 0;
-        transform: translateX(-6px);
-        transition: opacity 0.25s ease, transform 0.25s ease;
+        opacity: 0.45;
+        transform: none;
+        transition: opacity 0.15s;
     }
-    .nav .nav-link:hover::after, .nav .nav-link.active::after { opacity: 1; transform: translateX(0); }
-    .nav.open .nav-link:nth-child(1) { transform: translateX(0); opacity: 1; transition-delay: 0.08s; }
-    .nav.open .nav-link:nth-child(2) { transform: translateX(0); opacity: 1; transition-delay: 0.13s; }
-    .nav.open .nav-link:nth-child(3) { transform: translateX(0); opacity: 1; transition-delay: 0.18s; }
-    .nav.open .nav-link:nth-child(4) { transform: translateX(0); opacity: 1; transition-delay: 0.23s; }
-    .nav.open .nav-link:nth-child(5) { transform: translateX(0); opacity: 1; transition-delay: 0.28s; }
-    .nav.open .nav-link:nth-child(6) { transform: translateX(0); opacity: 1; transition-delay: 0.33s; }
     .nav .nav-link:hover, .nav .nav-link.active {
-        background: linear-gradient(90deg, #eef4ff 0%, #f5f9ff 100%);
+        background: #eef4ff;
         color: #1e62c9;
     }
+    .nav .nav-link:hover::after, .nav .nav-link.active::after { opacity: 1; }
+    .nav.open .nav-link:nth-child(1),
+    .nav.open .nav-link:nth-child(2),
+    .nav.open .nav-link:nth-child(3),
+    .nav.open .nav-link:nth-child(4),
+    .nav.open .nav-link:nth-child(5),
+    .nav.open .nav-link:nth-child(6) { transform: none; opacity: 1; transition-delay: 0s; }
 
-    /* Bouton "Faire un don" affiché DANS le menu mobile */
+    /* ---- BOUTON DON MOBILE ---- */
     .nav .nav-mobile-donate {
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 18px 0 0;
-        padding: 15px 24px;
-        background: linear-gradient(135deg, #D1507B 0%, #b8406a 100%);
+        margin-top: 20px;
+        padding: 16px;
+        background: #D1507B;
         color: #fff;
-        border-radius: 14px;
+        border-radius: 12px;
         font-weight: 700;
-        font-size: 0.95rem;
-        letter-spacing: 0.3px;
+        font-size: 1rem;
         text-decoration: none;
-        box-shadow: 0 8px 20px rgba(255, 79, 79, 0.35);
-        transform: translateX(30px);
-        opacity: 0;
-        transition: background 0.2s, transform 0.4s ease, opacity 0.4s ease, box-shadow 0.25s ease;
-        transition-delay: 0s;
-    }
-    .nav.open .nav-mobile-donate {
-        transform: translateX(0);
+        transform: none;
         opacity: 1;
-        transition-delay: 0.38s;
+        transition: background 0.2s;
     }
-    .nav .nav-mobile-donate:hover { box-shadow: 0 10px 26px rgba(209, 80, 123, 0.5); }
+    .nav.open .nav-mobile-donate { transform: none; opacity: 1; transition-delay: 0s; }
+    .nav .nav-mobile-donate:hover { background: #b8406a; }
 
     /* Cache le bouton don du header sur mobile */
     .header-btn { display: none; }

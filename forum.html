@@ -28,6 +28,7 @@
                 <a href="evenements.html" class="nav-link">Nos Actions</a>
                 <a href="contact.html" class="nav-link">Contact</a>
                 <a href="forum.html" class="nav-link active">Forum Parents</a>
+                <a href="https://fr.ulule.com/vive-les-vacances-lille/" target="_blank" rel="noopener" class="nav-mobile-donate">Faire un don</a>
             </nav>
             <a href="https://fr.ulule.com/vive-les-vacances-lille/" target="_blank" rel="noopener" class="btn btn-donate header-btn">
                 Faire un don
@@ -70,7 +71,7 @@
                         <select id="topicCategory">
                             <option value="general">💬 Discussion générale</option>
                             <option value="vacances">🏕️ Retours de vacances</option>
-                            <option value="conseils">💡 Conseils & Astuces</option>
+                            <option value="conseils">💡 Conseils &amp; Astuces</option>
                             <option value="entraide">🤝 Entraide</option>
                         </select>
                     </div>
@@ -81,15 +82,15 @@
                         <button type="button" class="composer-tool-btn" id="emojiToggle">😊 Emoji</button>
                         <label for="topicPhotos" class="composer-tool-btn">📷 Ajouter des photos</label>
                         <input type="file" id="topicPhotos" accept="image/*" multiple hidden>
-                        <span class="composer-help">Jusqu'a 10 photos par post</span>
+                        <span class="composer-help">Jusqu'à 10 photos par post</span>
                     </div>
                     <div class="emoji-panel" id="emojiPanel" hidden>
                         <button type="button" class="emoji-btn" data-emoji="😀">😀</button>
                         <button type="button" class="emoji-btn" data-emoji="😍">😍</button>
-                        <button type="button" class="emoji-btn" data-emoji="👏">👏</button>
+                        <button type="button" class="emoji-btn" data-emoji="👍">👍</button>
                         <button type="button" class="emoji-btn" data-emoji="❤️">❤️</button>
                         <button type="button" class="emoji-btn" data-emoji="🎉">🎉</button>
-                        <button type="button" class="emoji-btn" data-emoji="🏖️">🏖️</button>
+                        <button type="button" class="emoji-btn" data-emoji="🖐️">🖐️</button>
                         <button type="button" class="emoji-btn" data-emoji="🙏">🙏</button>
                         <button type="button" class="emoji-btn" data-emoji="🌟">🌟</button>
                     </div>
@@ -163,7 +164,7 @@
                     <a href="contact.html">Contact</a>
                     <a href="forum.html">Forum</a>
                 </div>
-                <p class="footer-copy">&copy; 2025 Vive Les Vacances ! &mdash; Association lilloise depuis 1993</p>
+                <p class="footer-copy">&copy; 2026 Vive Les Vacances ! &mdash; Association lilloise depuis 1993</p>
             </div>
         </div>
     </footer>
@@ -208,7 +209,6 @@
                     });
             }
 
-            // Optional local override for private config. Missing file is ignored.
             const localConfig = document.createElement('script');
             localConfig.src = 'forum-config.local.js';
             localConfig.onload = loadFirebaseSdkIfNeeded;
